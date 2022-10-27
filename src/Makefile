@@ -5,24 +5,27 @@ all: s21_cat s21_grep
  
 rebuild: clean s21_cat s21_grep
 
-main.o:
-	$(CC) $(CFLAGS) -c main.c
-
-s21_cat.o: s21_cat.c s21_cat.h
-	$(CC) $(CFLAGS) -c ./cat/s21_cat.c
-
-s21_grep.o: s21_grep.c s21_grep.h
-	$(CC) $(CFLAGS) -c ./cat/s21_grep.c
-
-common_modules.o: common_modules.c common_modules.h
-	$(CC) $(CFLAGS) -c ./common/common_modules.c
-
 s21_cat: s21_cat.o common_modules.o
-	$(CC) $(CFLAGS) -o s21_cat.o ../common/common_modules.o -o s21_cat
+	$(CC) $(CFLAGS) ./cat/s21_cat.o ./common/common_modules.o -o ./cat/s21_cat
 
-s21_grep: s21_grep.o common_modules.o ../common/common_modules.o -o s21_grep
-	$(CC) $(CFLAGS) -o s21_grep.o
+s21_grep: s21_grep.o common_modules.o
+	$(CC) $(CFLAGS) ./grep/s21_grep.o ./common/common_modules.o -o ./grep/s21_grep
+
+s21_cat.o:
+	$(CC) $(CFLAGS) -c ./cat/s21_cat.c -o ./cat/s21_cat.o
+
+s21_grep.o:
+	$(CC) $(CFLAGS) -c ./grep/s21_grep.c -o ./grep/s21_grep.o
+
+common_modules.o:
+	$(CC) $(CFLAGS) -c ./common/common_modules.c -o ./common/common_modules.o
 
 clean:
-		rm -rf *.o ../cat
-		rm -rf *.o ../grep
+	clean_s21_cat clean_s21_grep clean_common_modules
+
+clean_s21_cat:
+	rm -rf *.o ./cat
+clean_s21_grep:
+	rm -rf *.o ./grep
+clean_common_modules:
+	rm -rf *.o ./common_modules
