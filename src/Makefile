@@ -21,11 +21,4 @@ common_modules.o:
 	$(CC) $(CFLAGS) -c ./common/common_modules.c -o ./common/common_modules.o
 
 clean:
-	clean_s21_cat clean_s21_grep clean_common_modules
-
-clean_s21_cat:
-	rm -rf *.o ./cat
-clean_s21_grep:
-	rm -rf *.o ./grep
-clean_common_modules:
-	rm -rf *.o ./common_modules
+	rm -rf *.o ./cat/s21_cat ./cat/*.o rm -rf *.o ./grep/s21_grep ./grep/*.o rm -rf *.o ./common/*.o
