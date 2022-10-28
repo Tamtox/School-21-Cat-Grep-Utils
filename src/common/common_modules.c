@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "common_modules.h"
 
 int strLen (char *str) {
@@ -36,7 +37,35 @@ void readFile(char *fileName) {
         if (numbytes > 0) {
             char *text = malloc(numbytes * sizeof(char));
             fread(text, sizeof(char), numbytes, file);
-            printf("%s\n", text);
+            int lineCount = 0;
+            bool printLine = true;
+            bool endChar = true;
+            for (int i = 0; i < numbytes; i++) {
+                // Print line count
+                if (i == 0 && printLine) {
+                    lineCount++;
+                    printf("%d", lineCount);
+                }
+                if (text[i] == '\n') {
+                    if (endChar) {
+                        printf("$");
+                    }
+                    printf("\n");
+                    if (printLine) {
+                        lineCount++;
+                        printf("%d", lineCount);
+                    }
+                } else {
+                    printf("%c", text[i]);
+                }
+                // Make new line break if end of document is reached
+                if (i == numbytes - 1) {
+                    if (endChar) {
+                        printf("$");
+                    }
+                    printf("\n");
+                }
+            }
             free(text);
         }
     } else {
