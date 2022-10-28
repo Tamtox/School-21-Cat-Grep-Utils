@@ -11,6 +11,17 @@ int strLen (char *str) {
     return len;
 }
 
+bool strIncludes (char *str, char c) {
+    bool result = false;
+    int len = strLen(str);
+    for (int i = 0; i < len; i++) {
+        if (str[i] == c) {
+            result = true;
+        }
+    }
+    return result;
+}
+
 // char *getStrUntillSpaceEnd (char *str, int startPos) {
 //     // Find size of substring
 //     int endPos = startPos;
@@ -26,9 +37,10 @@ int strLen (char *str) {
 //     return substr;
 // }
 
-void readFile(char *fileName) {
+void readFile(char *fileName, char *flags) {
     FILE *file = NULL;
     file = fopen(fileName, "r");
+    bool
     if (file != NULL) {
         int numbytes;
         fseek(file, 0L, SEEK_END);
