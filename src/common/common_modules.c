@@ -11,16 +11,41 @@ int strLen (char *str) {
     return len;
 }
 
-bool strIncludes (char *str, char c) {
+bool strIncludesChar (char *str, char c) {
     bool result = false;
-    int len = strLen(str);
-    for (int i = 0; i < len; i++) {
+    int strL = strLen(str);
+    for (int i = 0; i < strLen; i++) {
         if (str[i] == c) {
             result = true;
         }
     }
     return result;
 }
+
+bool strIncludesSubstr (char *str, char *subStr) {
+    bool result = false;
+    int strL = strLen(str);
+    int subStrL = strLen(subStr);
+    for (int i = 0; i < strLen; i++) {
+        int similarity = 0;
+        if (str[i] == subStr[0]) {
+            for (int j = 0; j < subStrL; j++) {
+                if (subStr[j] == str[i + j]) {
+                    similarity++;
+                } else {
+                    break;
+                }
+            }
+        }
+        if (similarity == subStrL) {
+            result = true;
+            break;
+        }
+    }
+    return result;
+}
+
+
 
 // char *getStrUntillSpaceEnd (char *str, int startPos) {
 //     // Find size of substring
@@ -37,10 +62,9 @@ bool strIncludes (char *str, char c) {
 //     return substr;
 // }
 
-void readFile(char *fileName, char *flags) {
+void readFile(char *fileName/*,char *flags*/) {
     FILE *file = NULL;
     file = fopen(fileName, "r");
-    bool
     if (file != NULL) {
         int numbytes;
         fseek(file, 0L, SEEK_END);
