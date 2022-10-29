@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include "common_modules.h"
 
 int strLen (char *str) {
@@ -14,7 +15,7 @@ int strLen (char *str) {
 bool strIncludesChar (char *str, char c) {
     bool result = false;
     int strL = strLen(str);
-    for (int i = 0; i < strLen; i++) {
+    for (int i = 0; i < strL; i++) {
         if (str[i] == c) {
             result = true;
         }
@@ -22,47 +23,22 @@ bool strIncludesChar (char *str, char c) {
     return result;
 }
 
-bool strIncludesSubstr (char *str, char *subStr) {
-    bool result = false;
-    int strL = strLen(str);
-    int subStrL = strLen(subStr);
-    for (int i = 0; i < strLen; i++) {
-        int similarity = 0;
-        if (str[i] == subStr[0]) {
-            for (int j = 0; j < subStrL; j++) {
-                if (subStr[j] == str[i + j]) {
-                    similarity++;
-                } else {
-                    break;
-                }
-            }
-        }
-        if (similarity == subStrL) {
-            result = true;
-            break;
+char checkStrFlags (char *flag) {
+    char strFlags[3][20] = {"--number-nonblank","--number","--squeeze-blank"};
+    char *strFlagsLet = "bns";
+    char result = 'z';
+    for (int i = 0; i < 3; i++) {
+        int comparison = strcmp(strFlags[i],flag);
+        if (comparison == 0) {
+            result = strFlagsLet[i];
         }
     }
     return result;
 }
 
 
-
-// char *getStrUntillSpaceEnd (char *str, int startPos) {
-//     // Find size of substring
-//     int endPos = startPos;
-//     int i  = startPos;
-//     while (str[i] != ' ' || str[i] != '\0') {
-//         endPos++;
-//     }
-//     // Return substring
-//     char *substr = malloc((endPos - startPos) * sizeof(char));
-//     for (int j; j < endPos - startPos; j++) {
-//         substr[j] = str[startPos + j];
-//     }
-//     return substr;
-// }
-
-void readFile(char *fileName/*,char *flags*/) {
+void readFile(char *fileName, int *activeFlags) {
+    char *allowedFlags = "benstET";
     FILE *file = NULL;
     file = fopen(fileName, "r");
     if (file != NULL) {
@@ -109,23 +85,3 @@ void readFile(char *fileName/*,char *flags*/) {
     }
 
 }
-
-// char *get_command_input (char *str) {
-//     scanf("%[^\n]%*c",str);
-//     return str;
-// }
-
-// struct  catInputs parse_command_input (char* input) {
-//     int inputLen = strLen(input);
-//     struct catInputs parsed;
-//     char *catOptions = "benstuv";
-//     char error[1000] = "cat: illegal option -- z\nusage: cat [-benstuv] [file ...]";
-//     for (int i = 0; i < inputLen; i++) {
-//         if (input[i] == '-') {
-
-//         } else {
-
-//         }
-//     }
-//     return parsed;
-// }
