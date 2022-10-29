@@ -81,8 +81,8 @@ void readFile(char *fileName, catFlags *activeFlags) {
                 }
                 for (int i = 0; i < 256; i++) {
                     // Print non-printable characters
-                    if (line[i] == '\t' && activeFlags->T) {
-                        printf("^I");
+                    if (line[i] >= 0  && activeFlags->v) {
+                        printf("^%c", char);
                         continue;
                     }
                     // Show tabulation
