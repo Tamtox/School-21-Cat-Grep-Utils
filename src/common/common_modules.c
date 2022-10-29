@@ -38,7 +38,13 @@ char checkStrFlags (char *flag) {
 
 
 void readFile(char *fileName, int *activeFlags) {
-    char *allowedFlags = "benstET";
+    // struct catFlags {
+    //     bool b = false; // numbers only non-empty lines
+    //     bool e = false; // implies -v but also display end-of-line characters as $
+    //     bool n = false; // number all output lines
+    //     bool s = false; // squeeze multiple adjacent blank lines
+    //     bool t = false; // implies -v but also display tabs as ^I
+    // };
     FILE *file = NULL;
     file = fopen(fileName, "r");
     if (file != NULL) {
@@ -47,38 +53,53 @@ void readFile(char *fileName, int *activeFlags) {
         numbytes = ftell(file);
         fseek(file, 0L, SEEK_SET);
         if (numbytes > 0) {
-            char *text = malloc(numbytes * sizeof(char));
-            fread(text, sizeof(char), numbytes, file);
+            const unsigned MAX_LENGTH = 256;
+            char line[MAX_LENGTH];
             int lineCount = 0;
-            bool printLine = true;
-            bool endChar = true;
-            for (int i = 0; i < numbytes; i++) {
-                // Print line count
-                if (i == 0 && printLine) {
-                    lineCount++;
-                    printf("%d", lineCount);
-                }
-                if (text[i] == '\n') {
-                    if (endChar) {
-                        printf("$");
-                    }
+            int squeeze = 0;
+            while (fgets(line, MAX_LENGTH, file)) {
+                // Squeeze empty lines
+                if (activeFlags[3] && line[0] == '\n') {
+                    squeeze = 1;
+                    continue;
+                } 
+                if (squeeze) {
+                    squeeze = 0;
                     printf("\n");
-                    if (printLine) {
-                        lineCount++;
-                        printf("%d", lineCount);
-                    }
-                } else {
-                    printf("%c", text[i]);
                 }
-                // Make new line break if end of document is reached
-                if (i == numbytes - 1) {
-                    if (endChar) {
-                        printf("$");
+                // Line numeration
+                if (activeFlags[0] || activeFlags[2]) {
+                    if (activeFlags[0]) {
+                        if (line[0] != '\n') {
+                            lineCount ++;
+                            printf("%6d\t", lineCount);
+                        }
+                    } else {
+                        lineCount ++;
+                        printf("%6d\t", lineCount);
                     }
-                    printf("\n");
+                }
+                for (int i = 0; i < 256; i++) {
+                    // Break output when end is reached and add new line 
+                    if (line[i] == '\0') {
+                        if (line[i - 1] != '\n') {
+                            printf("\n");
+                        }
+                        break;
+                    } 
+                    // Print char of line or $ when needed
+                    if (line[i] == '\n') {
+                        if (activeFlags[1]) {
+                            printf("$\n");
+                        } else {
+                            printf("\n");
+                        }
+                    } else {
+                        printf("%c", line[i]);
+                    }
                 }
             }
-            free(text);
+            fclose(file);
         }
     } else {
         printf("cat: %s: No such file or directory", fileName);

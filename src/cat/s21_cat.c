@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
         }
         // Read files when flag parse if finished
         if (!flagParse) {
-            // readFile(argv[i]);
+            readFile(argv[i],activeFlags);
         } else {
             // Str argv to variable
             int flagLen = strLen(argv[i]);
@@ -52,9 +52,6 @@ int main(int argc, char *argv[]) {
             }
             free(flag);
         }
-    }
-    for (int j = 0; j < 7; j++) {
-        printf("%d\n",activeFlags[j]);
     }
     return 0;
 }
