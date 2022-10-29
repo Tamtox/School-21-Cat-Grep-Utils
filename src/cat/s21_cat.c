@@ -1,14 +1,13 @@
-// 2022 Manualti
+// Copyright 2022 Manualti
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "s21_cat.h"
 #include "../common/common_modules.h"
 
 int main(int argc, char *argv[]) {
     bool flagParse = true;
     char *allowedFlags = "benstET";
-    int activeFlags[7] = {0,0,0,0,0,0,0};
+    catFlags activeFlags = {false,false,false,false,false,false};
     bool legalFlag = true;
     for (int i = 1; i < argc && legalFlag; i++) {
         // Stop flag parse mode
@@ -17,7 +16,7 @@ int main(int argc, char *argv[]) {
         }
         // Read files when flag parse if finished
         if (!flagParse) {
-            readFile(argv[i],activeFlags);
+            readFile(argv[i],&activeFlags);
         } else {
             // Str argv to variable
             int flagLen = strLen(argv[i]);
@@ -37,17 +36,44 @@ int main(int argc, char *argv[]) {
                         break;
                     }
                     // Set flag to active
-                    for (int k = 0; k < 7; k++) {
-                        if (allowedFlags[k] == flag[j]) {
-                            activeFlags[k] = 1;
-                        }
+                    switch(flag[j]) {
+                        case 'b':
+                            activeFlags.b = true;
+                        break;
+                        case 'e':
+                            activeFlags.E = true;
+                            activeFlags.v = true;
+                        break;
+                        case 'E':
+                            activeFlags.E = true;
+                        break;
+                        case 'n':
+                            activeFlags.n = true;
+                        break;
+                        case 's':
+                            activeFlags.s = true;
+                        break;
+                        case 't':
+                            activeFlags.T = true;
+                            activeFlags.v = true;
+                        break;
+                        case 'T':
+                            activeFlags.T = true;
+                        break;
                     }
                 }
             } else {
-                for (int j = 0; j < 7; j++) {
-                    if (allowedFlags[j] == strFlagCheck) {
-                        activeFlags[j] = 1;
-                    }
+                // Set flag to active
+                switch(strFlagCheck) {
+                    case 'b':
+                        activeFlags.b = true;
+                    break;
+                    case 'n':
+                        activeFlags.n = true;
+                    break;
+                    case 's':
+                        activeFlags.s = true;
+                    break;
                 }
             }
             free(flag);
