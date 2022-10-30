@@ -7,19 +7,12 @@
 #include "../common/common_modules.h"
 
 int main(int argc, char *argv[]) {
-    bool flag_parse = true;
     char *allowed_flags = "eivcln";
     grepFlags active_flags = {false,false,false,false,false,false};
     bool legal_flag = true;
     for (int i = 1; i < argc && legal_flag; i++) {
-        // Stop flag parse mode when flags end
-        if (argv[i][0] != '-') {
-            flag_parse = false;
-        }
-        // Read files when flag parse if finished
-        if (!flag_parse) {
-            ReadGrepFile(argv[i],&active_flags);
-        } else {
+        // Parse flags
+        if (argv[i][0] == '-') {
             // Str argv to variable
             int flag_len = StrLen(argv[i]);
             char *flag = malloc(flag_len * sizeof(char));
@@ -59,6 +52,8 @@ int main(int argc, char *argv[]) {
                 }
             }
             free(flag);
+        } else {
+            
         }
     }
     return 0;
