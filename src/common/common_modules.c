@@ -80,33 +80,40 @@ void ReadCatFile(char *fileName, catFlags *active_flags) {
                     }
                 }
                 for (int i = 0; i < 256; i++) {
-                    // Show tabulation
-                    if (line[i] == '\t' && active_flags->T) {
-                        printf("^I");
-                        continue;
-                    }
                     // Break output when end is reached and add new line 
                     if (line[i] == '\0') {
                         break;
-                    } 
-                    // Print char of line or $ when needed
-                    if (line[i] == '\n') {
-                        if (active_flags->E) {
-                            printf("$\n");
+                    }
+                    // Show tabulation
+                    if (line[i] == '\t' && active_flags->T) {
+                        if (active_flags->T) {
+                            printf("^I");
+                            continue;
                         } else {
-                            printf("\n");
+                            printf("\t");
+                            continue;
                         }
-                    } else {
-                        printf("%c", line[i]);
                     }
                     // Print non-printable characters
-                    if ((line[i] >= 0 && line[i] <= 31) && (line[i] != 9 && line[i] != 10) && active_flags->v) {
+                    if ((line[i] >= 0 && line[i] <= 31) && line[i] != 9 && line[i] != 10 && active_flags->v) {
                         printf("^%c", line[i] + 64);
                         continue;
                     }
                     if (line[i] == 127 && active_flags->v) {
                         printf("^?");
                         continue;
+                    }
+                    // Make new line and add $ when flag E active
+                    if (line[i] == '\n') {
+                        if (active_flags->E) {
+                            printf("$\n");
+                            continue;
+                        } else {
+                            printf("\n");
+                            continue;
+                        }
+                    } else {
+                        printf("%c", line[i]);
                     }
                 }
             }
@@ -125,3 +132,53 @@ void ReadCatFile(char *fileName, catFlags *active_flags) {
     }
 
 }
+
+// void ReadGrepFile(char *fileName, catFlags *active_flags) {
+//     FILE *file = NULL;
+//     file = fopen(fileName, "r");
+//     if (file != NULL) {
+//         // Read file whole 
+//         int numbytes;
+//         fseek(file, 0L, SEEK_END);
+//         numbytes = ftell(file);
+//         fseek(file, 0L, SEEK_SET);
+//         if (numbytes > 0) {
+//             // Read file line by line
+//             const unsigned MAX_LENGTH = 256;
+//             char line[MAX_LENGTH];
+//             int line_count = 0;
+//             int squeeze = 0;
+//             while (fgets(line, MAX_LENGTH, file)) {
+//                 for (int i = 0; i < 256; i++) {
+//                     // Break output when end is reached and add new line 
+//                     if (line[i] == '\0') {
+//                         break;
+//                     } 
+//                     // Print char of line or $ when needed
+//                     if (line[i] == '\n') {
+//                         if (active_flags->E) {
+//                             printf("$\n");
+//                         } else {
+//                             printf("\n");
+//                         }
+//                     } else {
+//                         printf("%c", line[i]);
+//                     }
+//                     // Print non-printable characters
+//                     if ((line[i] >= 0 && line[i] <= 31) && (line[i] != 9 && line[i] != 10) && active_flags->v) {
+//                         printf("^%c", line[i] + 64);
+//                         continue;
+//                     }
+//                     if (line[i] == 127 && active_flags->v) {
+//                         printf("^?");
+//                         continue;
+//                     }
+//                 }
+//             }
+//             fclose(file);
+//         }
+//     } else {
+//         printf("cat: %s: No such file or directory", fileName);
+//     }
+
+// }

@@ -7,6 +7,8 @@
 #include "../common/common_modules.h"
 
 int main(int argc, char *argv[]) {
+    bool pattern_mode = true;
+    char *pattern;
     char *allowed_flags = "eivcln";
     grepFlags active_flags = {false,false,false,false,false,false};
     bool legal_flag = true;
@@ -52,8 +54,16 @@ int main(int argc, char *argv[]) {
                 }
             }
             free(flag);
-        } else {
-            
+        } 
+        // Parse pattern and files
+        else {
+            if (pattern_mode) {
+                int pattern_len = StrLen(argv[i]);
+                pattern = malloc(pattern_len * sizeof(char));
+                pattern_mode = false;
+            } else {
+                
+            }
         }
     }
     return 0;
