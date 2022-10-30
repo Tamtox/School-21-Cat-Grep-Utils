@@ -1,78 +1,79 @@
 // Copyright 2022 Manualti
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "../common/common_modules.h"
 
 int main(int argc, char *argv[]) {
-    bool flagParse = true;
-    char *allowedFlags = "benstET";
-    catFlags activeFlags = {false,false,false,false,false,false};
-    bool legalFlag = true;
-    for (int i = 1; i < argc && legalFlag; i++) {
-        // Stop flag parse mode
+    bool flag_parse = true;  
+    char *allowed_flags = "benstET";
+    catFlags active_flags = {false,false,false,false,false,false};
+    bool legal_flag = true;
+    for (int i = 1; i < argc && legal_flag; i++) {
+        // Stop flag parse mode when flags end
         if (argv[i][0] != '-') {
-            flagParse = false;
+            flag_parse = false;
         }
         // Read files when flag parse if finished
-        if (!flagParse) {
-            readFile(argv[i],&activeFlags);
+        if (!flag_parse) {
+            ReadCatFile(argv[i],&active_flags);
         } else {
             // Str argv to variable
-            int flagLen = strLen(argv[i]);
-            char *flag = malloc(flagLen * sizeof(char));
-            for (int j = 0; j < flagLen; j++) {
+            int flag_len = StrLen(argv[i]);
+            char *flag = malloc(flag_len * sizeof(char));
+            for (int j = 0; j < flag_len; j++) {
                 flag[j] = argv[i][j];
             }
             // Check string flags
-            char strFlagCheck = checkStrFlags(flag);
-            if (strFlagCheck == 'z') {
-                for (int j = 1; j < flagLen; j++) {
+            char str_flag_check = CheckStrFlags(flag);
+            if (str_flag_check == 'z') {
+                for (int j = 1; j < flag_len; j++) {
                     // Check if flag is legal
-                    if (!strIncludesChar(allowedFlags, flag[j])) {
+                    if (!StrIncludesChar(allowed_flags, flag[j])) {
                         printf("cat: illegal option -- %c\n", flag[j]);
-                        printf("usage: cat [-%s] [file ...]\n", allowedFlags);
-                        legalFlag = false;
+                        printf("usage: cat [-%s] [file ...]\n", allowed_flags);
+                        legal_flag = false;
                         break;
                     }
                     // Set flag to active
                     switch(flag[j]) {
                         case 'b':
-                            activeFlags.b = true;
+                            active_flags.b = true;
                         break;
                         case 'e':
-                            activeFlags.E = true;
-                            activeFlags.v = true;
+                            active_flags.E = true;
+                            active_flags.v = true;
                         break;
                         case 'E':
-                            activeFlags.E = true;
+                            active_flags.E = true;
                         break;
                         case 'n':
-                            activeFlags.n = true;
+                            active_flags.n = true;
                         break;
                         case 's':
-                            activeFlags.s = true;
+                            active_flags.s = true;
                         break;
                         case 't':
-                            activeFlags.T = true;
-                            activeFlags.v = true;
+                            active_flags.T = true;
+                            active_flags.v = true;
                         break;
                         case 'T':
-                            activeFlags.T = true;
+                            active_flags.T = true;
                         break;
                     }
                 }
             } else {
                 // Set flag to active
-                switch(strFlagCheck) {
+                switch(str_flag_check) {
                     case 'b':
-                        activeFlags.b = true;
+                        active_flags.b = true;
                     break;
                     case 'n':
-                        activeFlags.n = true;
+                        active_flags.n = true;
                     break;
                     case 's':
-                        activeFlags.s = true;
+                        active_flags.s = true;
                     break;
                 }
             }

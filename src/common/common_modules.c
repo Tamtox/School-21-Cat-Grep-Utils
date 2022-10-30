@@ -5,7 +5,7 @@
 #include "common_modules.h"
 
 
-int strLen (char *str) {
+int StrLen (char *str) {
     int len = 0;
     while (str[len] != '\0') {
         len++;
@@ -13,9 +13,9 @@ int strLen (char *str) {
     return len;
 }
 
-bool strIncludesChar (char *str, char c) {
+bool StrIncludesChar (char *str, char c) {
     bool result = false;
-    int strL = strLen(str);
+    int strL = StrLen(str);
     for (int i = 0; i < strL; i++) {
         if (str[i] == c) {
             result = true;
@@ -24,21 +24,21 @@ bool strIncludesChar (char *str, char c) {
     return result;
 }
 
-char checkStrFlags (char *flag) {
-    char strFlags[3][20] = {"--number-nonblank","--number","--squeeze-blank"};
-    char *strFlagsLet = "bns";
+char CheckStrFlags (char *flag) {
+    char str_flags[3][20] = {"--number-nonblank","--number","--squeeze-blank"};
+    char *str_flags_let = "bns";
     char result = 'z';
     for (int i = 0; i < 3; i++) {
-        int comparison = strcmp(strFlags[i],flag);
+        int comparison = strcmp(str_flags[i],flag);
         if (comparison == 0) {
-            result = strFlagsLet[i];
+            result = str_flags_let[i];
         }
     }
     return result;
 }
 
 
-void readFile(char *fileName, catFlags *activeFlags) {
+void ReadCatFile(char *fileName, catFlags *active_flags) {
     FILE *file = NULL;
     file = fopen(fileName, "r");
     if (file != NULL) {
@@ -51,42 +51,37 @@ void readFile(char *fileName, catFlags *activeFlags) {
             // Read file line by line
             const unsigned MAX_LENGTH = 256;
             char line[MAX_LENGTH];
-            int lineCount = 0;
+            int line_count = 0;
             int squeeze = 0;
             while (fgets(line, MAX_LENGTH, file)) {
                 // Squeeze empty lines
-                if (activeFlags->s && line[0] == '\n') {
+                if (active_flags->s && line[0] == '\n') {
                     squeeze = 1;
                     continue;
                 } 
                 if (squeeze) {
                     squeeze = 0;
-                    if (activeFlags->E) {
+                    if (active_flags->E) {
                         printf("$\n");
                     } else {
                         printf("\n");
                     }
                 }
                 // Line numeration
-                if (activeFlags->b || activeFlags->n) {
-                    if (activeFlags->b) {
+                if (active_flags->b || active_flags->n) {
+                    if (active_flags->b) {
                         if (line[0] != '\n') {
-                            lineCount ++;
-                            printf("%6d\t", lineCount);
+                            line_count ++;
+                            printf("%6d\t", line_count);
                         }
                     } else {
-                        lineCount ++;
-                        printf("%6d\t", lineCount);
+                        line_count ++;
+                        printf("%6d\t", line_count);
                     }
                 }
                 for (int i = 0; i < 256; i++) {
-                    // Print non-printable characters
-                    if (line[i] >= 0  && activeFlags->v) {
-                        printf("^%c", char);
-                        continue;
-                    }
                     // Show tabulation
-                    if (line[i] == '\t' && activeFlags->T) {
+                    if (line[i] == '\t' && active_flags->T) {
                         printf("^I");
                         continue;
                     }
@@ -96,7 +91,7 @@ void readFile(char *fileName, catFlags *activeFlags) {
                     } 
                     // Print char of line or $ when needed
                     if (line[i] == '\n') {
-                        if (activeFlags->E) {
+                        if (active_flags->E) {
                             printf("$\n");
                         } else {
                             printf("\n");
@@ -104,11 +99,20 @@ void readFile(char *fileName, catFlags *activeFlags) {
                     } else {
                         printf("%c", line[i]);
                     }
+                    // Print non-printable characters
+                    if ((line[i] >= 0 && line[i] <= 31) && (line[i] != 9 && line[i] != 10) && active_flags->v) {
+                        printf("^%c", line[i] + 64);
+                        continue;
+                    }
+                    if (line[i] == 127 && active_flags->v) {
+                        printf("^?");
+                        continue;
+                    }
                 }
             }
             // Squeeze empty lines if they are at the end
             if (squeeze) {
-                if (activeFlags->E) {
+                if (active_flags->E) {
                     printf("$\n");
                 } else {
                     printf("\n");
