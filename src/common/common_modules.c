@@ -37,6 +37,24 @@ char CheckStrFlags (char *flag) {
     return result;
 }
 
+int CatLineNumeration (bool numerate_full_lines, bool numerate_lines, int line_count, char line_start) {
+    if (numerate_full_lines || numerate_lines) {
+        // Numerates only non blank lines
+        if (numerate_full_lines) {
+            if (line_start != '\n') {
+                line_count ++;
+                printf("%6d\t", line_count);
+            }
+        } 
+        // Numerates all lines
+        else {
+            line_count ++;
+            printf("%6d\t", line_count);
+        }
+    }
+    return line_count;
+}
+
 
 void ReadCatFile(char *fileName, catFlags *active_flags) {
     FILE *file = NULL;
@@ -62,23 +80,23 @@ void ReadCatFile(char *fileName, catFlags *active_flags) {
                 if (squeeze) {
                     squeeze = 0;
                     if (active_flags->E) {
-                        printf("$\n");
+                        if (active_flags->n && !active_flags->b) {
+                            line_count++;
+                            printf("%6d\t$\n",line_count);
+                        } else {
+                            printf("$\n");
+                        }
                     } else {
-                        printf("\n");
+                        if (active_flags->n && !active_flags->b) {
+                            line_count++;
+                            printf("%6d\t\n",line_count);
+                        } else {
+                            printf("\n");
+                        }
                     }
                 }
                 // Line numeration
-                if (active_flags->b || active_flags->n) {
-                    if (active_flags->b) {
-                        if (line[0] != '\n') {
-                            line_count ++;
-                            printf("%6d\t", line_count);
-                        }
-                    } else {
-                        line_count ++;
-                        printf("%6d\t", line_count);
-                    }
-                }
+                line_count = CatLineNumeration(active_flags->b,active_flags->n,line_count,line[0]);
                 for (int i = 0; i < 256; i++) {
                     // Break output when end is reached and add new line 
                     if (line[i] == '\0') {
@@ -128,9 +146,8 @@ void ReadCatFile(char *fileName, catFlags *active_flags) {
             fclose(file);
         }
     } else {
-        printf("cat: %s: No such file or directory", fileName);
+        fprintf(stderr,"cat: No such file or directory\n");
     }
-
 }
 
 // void ReadGrepFile(char *fileName, catFlags *active_flags) {

@@ -7,7 +7,7 @@
 
 int main(int argc, char *argv[]) {
     bool flag_parse = true;  
-    char *allowed_flags = "benstET";
+    char *allowed_flags = "benstvET";
     catFlags active_flags = {false,false,false,false,false,false};
     bool legal_flag = true;
     for (int i = 1; i < argc && legal_flag; i++) {
@@ -60,6 +60,9 @@ int main(int argc, char *argv[]) {
                         break;
                         case 'T':
                             active_flags.T = true;
+                        break;
+                        case 'v':
+                            active_flags.v = true;
                         break;
                     }
                 }

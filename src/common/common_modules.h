@@ -22,6 +22,7 @@ typedef struct GrepFlags {
 int StrLen (char *str);
 bool StrIncludesChar (char *str, char c);
 char CheckStrFlags (char *flag);
+int CatLineNumeration (bool numerate_full_lines, bool numerate_lines, int line_count, char line_start);
 void ReadCatFile(char *fileName, catFlags *activeFlags);
 
 #endif // SRC_S21_COMMON_H_
