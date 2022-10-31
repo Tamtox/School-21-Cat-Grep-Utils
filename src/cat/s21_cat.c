@@ -31,8 +31,8 @@ int main(int argc, char *argv[]) {
                 for (int j = 1; j < flag_len; j++) {
                     // Check if flag is legal
                     if (!StrIncludesChar(allowed_flags, flag[j])) {
-                        printf("cat: illegal option -- %c\n", flag[j]);
-                        printf("usage: cat [-%s] [file ...]\n", allowed_flags);
+                        fprintf(stderr,"cat: illegal option -- %c\n", flag[j]);
+                        fprintf(stderr,"usage: cat [-%s] [file ...]\n", allowed_flags);
                         legal_flag = false;
                         break;
                     }

@@ -75,11 +75,11 @@ do
 done
 
 # 3 параметра
-for var1 in b e n s t v z
+for var1 in b e n s t v 
 do
-    for var2 in b e n s t v z
+    for var2 in b e n s t v 
     do
-        for var3 in b e n s t v z
+        for var3 in b e n s t v 
         do
             if [ $var1 != $var2 ] && [ $var2 != $var3 ] && [ $var1 != $var3 ]
             then
