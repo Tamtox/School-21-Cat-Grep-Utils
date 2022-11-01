@@ -8,7 +8,7 @@
 int main(int argc, char *argv[]) {
     bool pattern_mode = true;
     char *patterns = malloc(1 * sizeof(char));
-    // char *files = malloc(1 * sizeof(char));
+    char *files = malloc(1 * sizeof(char));
     char *allowed_flags = "eivcln";
     grepFlags active_flags = {false,false,false,false,false,false};
     bool legal_flag = true;
@@ -38,9 +38,11 @@ int main(int argc, char *argv[]) {
                     if (remaining_len > 0) {
                         char *remaining_flags = malloc(0 * sizeof(char));
                         SliceStr (flag, remaining_flags, j + 1 , flag_len);
-                        AppendStr (patterns, remaining_flags);
+                        AppendStr (patterns, remaining_flags, ',');
                         pattern_mode = false;
                         free(remaining_flags);
+                    } else {
+                        pattern_mode = true;
                     }
                     break;
                 }
@@ -68,26 +70,19 @@ int main(int argc, char *argv[]) {
         // Parse pattern and files then save them
         else {
             if (pattern_mode) {
-                AppendStr (patterns, argv[i]);
+                AppendStr(patterns, argv[i],',');
                 pattern_mode = false;
-                // int pattern_len = StrLen(argv[i]);
-                // pattern = malloc(pattern_len * sizeof(char));
             } else {
-                // ReadGrepFile(argv[i], &active_flags, patterns);
+                AppendStr(files, argv[i],',');
             }
         }
     }
-    int i = 0;
-    while (patterns[i] != '\0') {
-        printf("%c",patterns[i]); 
-        if (patterns[i + 1] == '\0') {
-            printf("\n");
-        }
-        i++;
-    }
+    printf("%s\n",patterns);
+    printf("%s\n",files);
     if (active_flags.i) {
-        printf("i");
+        printf("End");
     }
     free(patterns);
+    free(files);
     return 0;
 }

@@ -23,7 +23,7 @@ int StrLen (char *str);
 bool StrIncludesChar (char *str, char c);
 char CheckStrFlags (char *flag);
 void SliceStr (char *str, char *result, int from , int to);
-void AppendStr (char *str1, char *str2);
+void AppendStr (char *str1, char *str2, char separator);
 int CatLineNumeration (bool numerate_full_lines, bool numerate_lines, int line_count, char line_start);
 void ReadCatFile(char *fileName, catFlags *activeFlags);
 // void ReadGrepFile(char *fileName, catFlags *active_flags, char *patterns);

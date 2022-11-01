@@ -47,15 +47,13 @@ void SliceStr (char *str, char *result, int from , int to) {
 }
 
 void AppendStr (char *str1, char *str2, char separator) {
-    int str1_len = strlen(str1);
-    int str2_len = strlen(str2);
+    int str1_len = StrLen(str1);
+    int str2_len = StrLen(str2);
     str1 = realloc(str1, (str1_len + str2_len + 1) * sizeof(char));
-    if (str1_len > 0 && separator) {
-        str1[str1_len] = separator;
+    for (int i = 0; i < str2_len; i++) {
+        str1[str1_len + i] = str2[i];
     }
-    for (int i = 0; i < str2_len; i ++) {
-        str1[str1_len + i + 1] = str2[i];
-    }
+    str1[str1_len + str2_len] = separator;
     str1[str1_len + str2_len + 1] = '\0';
 }
 
