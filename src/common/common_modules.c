@@ -75,7 +75,6 @@ int CatLineNumeration (bool numerate_full_lines, bool numerate_lines, int line_c
     return line_count;
 }
 
-
 void ReadCatFile(char *fileName, catFlags *active_flags) {
     FILE *file = NULL;
     file = fopen(fileName, "r");
@@ -180,51 +179,43 @@ void ReadCatFile(char *fileName, catFlags *active_flags) {
     }
 }
 
-// void ReadGrepFile(char *fileName, catFlags *active_flags, char *patterns) {
-//     FILE *file = NULL;
-//     file = fopen(fileName, "r");
-//     if (file != NULL) {
-//         // Read file whole 
-//         int numbytes;
-//         fseek(file, 0L, SEEK_END);
-//         numbytes = ftell(file);
-//         fseek(file, 0L, SEEK_SET);
-//         if (numbytes > 0) {
-//             // Read file line by line
-//             const unsigned MAX_LENGTH = 256;
-//             char line[MAX_LENGTH];
-//             int line_count = 0;
-//             int squeeze = 0;
-//             while (fgets(line, MAX_LENGTH, file)) {
-//                 for (int i = 0; i < 256; i++) {
-//                     // Break output when end is reached and add new line 
-//                     if (line[i] == '\0') {
-//                         break;
-//                     } 
-//                     // Print char of line or $ when needed
-//                     if (line[i] == '\n') {
-//                         if (active_flags->E) {
-//                             printf("$\n");
-//                         } else {
-//                             printf("\n");
-//                         }
-//                     } else {
-//                         printf("%c", line[i]);
-//                     }
-//                     // Print non-printable characters
-//                     if ((line[i] >= 0 && line[i] <= 31) && (line[i] != 9 && line[i] != 10) && active_flags->v) {
-//                         printf("^%c", line[i] + 64);
-//                         continue;
-//                     }
-//                     if (line[i] == 127 && active_flags->v) {
-//                         printf("^?");
-//                         continue;
-//                     }
-//                 }
-//             }
-//             fclose(file);
-//         }
-//     } else {
-//         printf("cat: %s: No such file or directory", fileName);
-//     }
-// }
+void ReadGrepFile(char *fileName,/* grepFlags *active_flags,*/ char *patterns) {
+    FILE *file = NULL;
+    file = fopen(fileName, "r");
+    if (file != NULL) {
+        // Read file whole 
+        int numbytes;
+        fseek(file, 0L, SEEK_END);
+        numbytes = ftell(file);
+        fseek(file, 0L, SEEK_SET);
+        if (numbytes > 0) {
+            // Read file line by line
+            const unsigned MAX_LENGTH = 256;
+            char line[MAX_LENGTH];
+            // int line_count = 0;
+            while (fgets(line, MAX_LENGTH, file)) {
+                // Iterate through patterns
+                int patterns_len = StrLen(patterns);
+                int start_pos = 0;
+                for (int i = 0; i < patterns_len; i++) {
+                    if (patterns[i] == ',') {
+                        char *pattern = malloc(0 * sizeof(char));
+                        SliceStr (patterns, pattern, start_pos, i);
+                        start_pos = i + 1;
+                        free(pattern);
+                    }
+                }
+                // for (int i = 0; i < 256; i++) {
+                //     // Break output when end is reached and add new line 
+                //     if (line[i] == '\0') {
+                //         break;
+                //     } 
+                //     printf("%c", line[i]);
+                // }
+            }
+            fclose(file);
+        }
+    } else {
+        printf("cat: %s: No such file or directory", fileName);
+    }
+}

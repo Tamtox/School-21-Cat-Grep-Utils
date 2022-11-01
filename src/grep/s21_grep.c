@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
                     int remaining_len = flag_len - j - 1;
                     if (remaining_len > 0) {
                         char *remaining_flags = malloc(0 * sizeof(char));
-                        SliceStr (flag, remaining_flags, j + 1 , flag_len);
+                        SliceStr (flag, remaining_flags, j + 1, flag_len);
                         AppendStr (patterns, remaining_flags, ',');
                         pattern_mode = false;
                         free(remaining_flags);
@@ -77,8 +77,18 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-    printf("%s\n",patterns);
-    printf("%s\n",files);
+		// Iterate through files
+		int files_len = StrLen(files);
+		int start_pos = 0;
+		for (int i = 0; i < files_len; i++) {
+			if (files[i] == ',') {
+				char *file_name = malloc(0 * sizeof(char));
+				SliceStr (files, file_name, start_pos, i);
+				ReadGrepFile(file_name, patterns);
+				start_pos = i + 1;
+				free(file_name);
+			}
+		}
     if (active_flags.i) {
         printf("End");
     }
