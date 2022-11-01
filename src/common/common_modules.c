@@ -38,6 +38,27 @@ char CheckStrFlags (char *flag) {
     return result;
 }
 
+void SliceStr (char *str, char *result, int from , int to) {
+    result = realloc(result, (to - from) * sizeof(char));
+    for (int i = 0; i < to - from; i++) {
+        result[i] = str[from + i];
+    }
+    result[to - from] = '\0';
+}
+
+void AppendStr (char *str1, char *str2, char separator) {
+    int str1_len = strlen(str1);
+    int str2_len = strlen(str2);
+    str1 = realloc(str1, (str1_len + str2_len + 1) * sizeof(char));
+    if (str1_len > 0 && separator) {
+        str1[str1_len] = separator;
+    }
+    for (int i = 0; i < str2_len; i ++) {
+        str1[str1_len + i + 1] = str2[i];
+    }
+    str1[str1_len + str2_len + 1] = '\0';
+}
+
 int CatLineNumeration (bool numerate_full_lines, bool numerate_lines, int line_count, char line_start) {
     if (numerate_full_lines || numerate_lines) {
         // Numerates only non blank lines
@@ -161,51 +182,51 @@ void ReadCatFile(char *fileName, catFlags *active_flags) {
     }
 }
 
-void ReadGrepFile(char *fileName, catFlags *active_flags, char *patterns) {
-    FILE *file = NULL;
-    file = fopen(fileName, "r");
-    if (file != NULL) {
-        // Read file whole 
-        int numbytes;
-        fseek(file, 0L, SEEK_END);
-        numbytes = ftell(file);
-        fseek(file, 0L, SEEK_SET);
-        if (numbytes > 0) {
-            // Read file line by line
-            const unsigned MAX_LENGTH = 256;
-            char line[MAX_LENGTH];
-            int line_count = 0;
-            int squeeze = 0;
-            while (fgets(line, MAX_LENGTH, file)) {
-                for (int i = 0; i < 256; i++) {
-                    // Break output when end is reached and add new line 
-                    if (line[i] == '\0') {
-                        break;
-                    } 
-                    // Print char of line or $ when needed
-                    if (line[i] == '\n') {
-                        if (active_flags->E) {
-                            printf("$\n");
-                        } else {
-                            printf("\n");
-                        }
-                    } else {
-                        printf("%c", line[i]);
-                    }
-                    // Print non-printable characters
-                    if ((line[i] >= 0 && line[i] <= 31) && (line[i] != 9 && line[i] != 10) && active_flags->v) {
-                        printf("^%c", line[i] + 64);
-                        continue;
-                    }
-                    if (line[i] == 127 && active_flags->v) {
-                        printf("^?");
-                        continue;
-                    }
-                }
-            }
-            fclose(file);
-        }
-    } else {
-        printf("cat: %s: No such file or directory", fileName);
-    }
-}
+// void ReadGrepFile(char *fileName, catFlags *active_flags, char *patterns) {
+//     FILE *file = NULL;
+//     file = fopen(fileName, "r");
+//     if (file != NULL) {
+//         // Read file whole 
+//         int numbytes;
+//         fseek(file, 0L, SEEK_END);
+//         numbytes = ftell(file);
+//         fseek(file, 0L, SEEK_SET);
+//         if (numbytes > 0) {
+//             // Read file line by line
+//             const unsigned MAX_LENGTH = 256;
+//             char line[MAX_LENGTH];
+//             int line_count = 0;
+//             int squeeze = 0;
+//             while (fgets(line, MAX_LENGTH, file)) {
+//                 for (int i = 0; i < 256; i++) {
+//                     // Break output when end is reached and add new line 
+//                     if (line[i] == '\0') {
+//                         break;
+//                     } 
+//                     // Print char of line or $ when needed
+//                     if (line[i] == '\n') {
+//                         if (active_flags->E) {
+//                             printf("$\n");
+//                         } else {
+//                             printf("\n");
+//                         }
+//                     } else {
+//                         printf("%c", line[i]);
+//                     }
+//                     // Print non-printable characters
+//                     if ((line[i] >= 0 && line[i] <= 31) && (line[i] != 9 && line[i] != 10) && active_flags->v) {
+//                         printf("^%c", line[i] + 64);
+//                         continue;
+//                     }
+//                     if (line[i] == 127 && active_flags->v) {
+//                         printf("^?");
+//                         continue;
+//                     }
+//                 }
+//             }
+//             fclose(file);
+//         }
+//     } else {
+//         printf("cat: %s: No such file or directory", fileName);
+//     }
+// }

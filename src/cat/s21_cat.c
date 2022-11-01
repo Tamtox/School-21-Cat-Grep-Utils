@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
         }
         // Read files when flag parse if finished
         if (!flag_parse) {
-            ReadCatFile(argv[i],&active_flags);
+            ReadCatFile(argv[i], &active_flags);
         } else {
             // Str argv to variable
             int flag_len = StrLen(argv[i]);
