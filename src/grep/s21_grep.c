@@ -10,6 +10,7 @@ int main(int argc, char *argv[]) {
   bool pattern_mode = true;
   char *patterns = malloc(1 * sizeof(char));
   char *files = malloc(1 * sizeof(char));
+  int files_count = 0;
 	if (patterns == NULL || files == NULL) {
 		fprintf(stderr,"Malloc error\n");
 		exit(1);
@@ -49,6 +50,10 @@ int main(int argc, char *argv[]) {
           int remaining_len = flag_len - j - 1;
           if (remaining_len > 0) {
             char *remaining_flags = malloc(0 * sizeof(char));
+            if (remaining_flags == NULL) {
+              fprintf(stderr,"Malloc error\n");
+		          exit(1);
+            }
             SliceStr(flag, remaining_flags, j + 1, flag_len);
             AppendStr(patterns, remaining_flags, ',');
             pattern_mode = false;
@@ -86,6 +91,7 @@ int main(int argc, char *argv[]) {
         pattern_mode = false;
       } else {
         AppendStr(files, argv[i], ',');
+        files_count++;
       }
     }
   }
@@ -95,14 +101,15 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < files_len; i++) {
     if (files[i] == ',') {
       char *file_name = malloc(0 * sizeof(char));
+      if (file_name == NULL) {
+        fprintf(stderr,"Malloc error\n");
+		    exit(1);
+      }
       SliceStr(files, file_name, start_pos, i);
-      ReadGrepFile(file_name, &active_flags, patterns);
+      ReadGrepFile(file_name, &active_flags, patterns, files_count);
       start_pos = i + 1;
       free(file_name);
     }
-  }
-  if (active_flags.i) {
-    printf("End");
   }
   free(patterns);
   free(files);

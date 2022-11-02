@@ -179,31 +179,63 @@ void ReadCatFile(char *fileName, catFlags *active_flags) {
     }
 }
 
-void PrintMatchedLine(int **count, char *line, char *pattern, grepFlags *active_flags) {
+void PrintMatchedLine(int *line_count, int *matched_count, char *line, char *pattern, grepFlags *active_flags, char *file_name, int files_count) {
     regex_t regex;
     int reti;
     char msgbuf[100];
+    // Regex compilation
     reti = regcomp(&regex, pattern, 0);
     if (reti) {
         fprintf(stderr, "Could not compile regex\n");
         exit(1);
     }
+    // Regex execution
     reti = regexec(&regex, line, 0, NULL, 0);
-    count[0]++;
+    *line_count = *line_count + 1;
     // Print normal or inverted matches
-    if (!reti && !active_flags->v) {
-        // Print line numbers if v flag is active
-        if (active_flags->n) {
-            printf("%d:%s", count[0], line);
-        } else {
-            printf("%s", line);
+    if (!reti) {
+        // Print line numbers if v flag is inactive
+        if (!active_flags->v) {
+            *matched_count = *matched_count + 1; 
+            // Check if only total count of matched lines needed
+            if (!active_flags->c) { 
+                // Line count 
+                if (active_flags->n) {
+                    if (files_count > 1) {
+                        printf("%s:%d:%s", file_name, *line_count, line);
+                    } else {
+                        printf("%d:%s", *line_count, line);
+                    }
+                } else {
+                    if (files_count > 1) {
+                        printf("%s:%s", file_name, line);
+                    } else {
+                        printf("%s", line);
+                    }
+                }
+            }
         }
-    } else if (reti == REG_NOMATCH && active_flags->v) {
+    } else if (reti == REG_NOMATCH) {
         // Print line numbers if v flag is active
-        if (active_flags->n) {
-            printf("%d:%s", count[0], line);
-        } else {
-            printf("%s", line);
+        if (active_flags->v) {
+            *matched_count = *matched_count + 1;
+            // Check if only total count of matched lines needed
+            if (!active_flags->c) {
+                // Line count 
+                if (active_flags->n) {
+                    if (files_count > 1) {
+                        printf("%s:%d:%s", file_name, *line_count, line);
+                    } else {
+                        printf("%d:%s", *line_count, line);
+                    }
+                } else {
+                    if (files_count > 1) {
+                        printf("%s:%s", file_name, line);
+                    } else {
+                        printf("%s", line);
+                    }
+                }
+            }
         }
     } else {
         regerror(reti, &regex, msgbuf, sizeof(msgbuf));
@@ -212,9 +244,9 @@ void PrintMatchedLine(int **count, char *line, char *pattern, grepFlags *active_
     }
 }
 
-void ReadGrepFile(char *fileName, grepFlags *active_flags, char *patterns) {
+void ReadGrepFile(char *file_name, grepFlags *active_flags, char *patterns, int files_count) {
     FILE *file = NULL;
-    file = fopen(fileName, "r");
+    file = fopen(file_name, "r");
     if (file != NULL) {
         // Read file whole 
         int numbytes;
@@ -225,8 +257,8 @@ void ReadGrepFile(char *fileName, grepFlags *active_flags, char *patterns) {
             // Read file line by line
             const unsigned MAX_LENGTH = 256;
             char line[MAX_LENGTH];
-            // count[0] : line numeration , count[1] : number of matched lines:
-            int count[] = {0,0};
+            int line_count = 0;
+            int matched_count = 0;
             while (fgets(line, MAX_LENGTH, file)) {
                 // Iterate through patterns
                 int patterns_len = StrLen(patterns);
@@ -235,7 +267,7 @@ void ReadGrepFile(char *fileName, grepFlags *active_flags, char *patterns) {
                     if (patterns[i] == ',') {
                         char *pattern = malloc(0 * sizeof(char));
                         SliceStr (patterns, pattern, start_pos, i);
-                        PrintMatchedLine(&count, line, pattern, active_flags);
+                        PrintMatchedLine(&line_count, &matched_count, line, pattern, active_flags, file_name, files_count);
                         start_pos = i + 1;
                         free(pattern);
                     }
@@ -243,11 +275,24 @@ void ReadGrepFile(char *fileName, grepFlags *active_flags, char *patterns) {
             }
             // Print matched lines count
             if (active_flags->c) {
-                printf("%d\n", count[1]);
+                // Output filenames if there are more than 1 file
+                if (files_count > 1) {
+                    printf("%s:%d\n", file_name , matched_count);
+                    // Output only matched file names
+                    if (active_flags->l && matched_count) {
+                        printf("%s\n", file_name);
+                    }
+                } else {
+                    printf("%d\n", matched_count);
+                    // Output only matched file names
+                    if (active_flags->l && matched_count) {
+                        printf("%s\n", file_name);
+                    }
+                }
             }
             fclose(file);
         }
     } else {
-        fprintf(stderr,"grep: %s: No such file or directory\n", fileName);
+        fprintf(stderr,"grep: %s: No such file or directory\n", file_name);
     }
 }
