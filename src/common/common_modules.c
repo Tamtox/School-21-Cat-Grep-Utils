@@ -179,25 +179,29 @@ void ReadCatFile(char *fileName, catFlags *active_flags) {
     }
 }
 
-int PrintMatchedLine(int line_num, char *line, char *pattern, grepFlags *active_flags) {
+void PrintMatchedLine(int **count, char *line, char *pattern, grepFlags *active_flags) {
     regex_t regex;
     int reti;
     char msgbuf[100];
     reti = regcomp(&regex, pattern, 0);
+    if (reti) {
+        fprintf(stderr, "Could not compile regex\n");
+        exit(1);
+    }
     reti = regexec(&regex, line, 0, NULL, 0);
-    line_num++;
+    count[0]++;
     // Print normal or inverted matches
     if (!reti && !active_flags->v) {
         // Print line numbers if v flag is active
         if (active_flags->n) {
-            printf("%d:%s", line_num, line);
+            printf("%d:%s", count[0], line);
         } else {
             printf("%s", line);
         }
     } else if (reti == REG_NOMATCH && active_flags->v) {
         // Print line numbers if v flag is active
         if (active_flags->n) {
-            printf("%d:%s", line_num, line);
+            printf("%d:%s", count[0], line);
         } else {
             printf("%s", line);
         }
@@ -206,7 +210,6 @@ int PrintMatchedLine(int line_num, char *line, char *pattern, grepFlags *active_
         fprintf(stderr, "Regex match failed: %s\n", msgbuf);
         exit(1);
     }
-    return line_num;
 }
 
 void ReadGrepFile(char *fileName, grepFlags *active_flags, char *patterns) {
@@ -222,7 +225,8 @@ void ReadGrepFile(char *fileName, grepFlags *active_flags, char *patterns) {
             // Read file line by line
             const unsigned MAX_LENGTH = 256;
             char line[MAX_LENGTH];
-            int line_count = 0;
+            // count[0] : line numeration , count[1] : number of matched lines:
+            int count[] = {0,0};
             while (fgets(line, MAX_LENGTH, file)) {
                 // Iterate through patterns
                 int patterns_len = StrLen(patterns);
@@ -231,11 +235,15 @@ void ReadGrepFile(char *fileName, grepFlags *active_flags, char *patterns) {
                     if (patterns[i] == ',') {
                         char *pattern = malloc(0 * sizeof(char));
                         SliceStr (patterns, pattern, start_pos, i);
-                        line_count = PrintMatchedLine(line_count, line, pattern, active_flags);
+                        PrintMatchedLine(&count, line, pattern, active_flags);
                         start_pos = i + 1;
                         free(pattern);
                     }
                 }
+            }
+            // Print matched lines count
+            if (active_flags->c) {
+                printf("%d\n", count[1]);
             }
             fclose(file);
         }
