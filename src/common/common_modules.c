@@ -189,33 +189,32 @@ void ReadCatFile(char *fileName, catFlags *active_flags) {
     }
 }
 
-void ReadPatternFromFile (char *file_name) {
-    FILE *file = NULL;
-    file = fopen(file_name, "r");
-    if (file != NULL) {
-        // Read file whole 
-        int numbytes;
-        fseek(file, 0L, SEEK_END);
-        numbytes = ftell(file);
-        fseek(file, 0L, SEEK_SET);
-        if (numbytes > 0) {
-            // Read file line by line
-            const unsigned MAX_LENGTH = 256;
-            char line[MAX_LENGTH];
-            int line_count = 0;
-            int matched_count = 0;
-            while (fgets(line, MAX_LENGTH, file)) {
-                // Iterate through patterns
-            }
-            fclose(file);
-        }
-    } else {
-        fprintf(stderr,"grep: %s: No such file or directory\n", file_name);
-    }
-}
+// void ReadPatternFromFile (char *file_name) {
+//     FILE *file = NULL;
+//     file = fopen(file_name, "r");
+//     if (file != NULL) {
+//         // Read file whole 
+//         int numbytes;
+//         fseek(file, 0L, SEEK_END);
+//         numbytes = ftell(file);
+//         fseek(file, 0L, SEEK_SET);
+//         if (numbytes > 0) {
+//             // Read file line by line
+//             const unsigned MAX_LENGTH = 256;
+//             char line[MAX_LENGTH];
+//             int line_count = 0;
+//             int matched_count = 0;
+//             while (fgets(line, MAX_LENGTH, file)) {
+//                 // Iterate through patterns
+//             }
+//             fclose(file);
+//         }
+//     } else {
+//         fprintf(stderr,"grep: %s: No such file or directory\n", file_name);
+//     }
+// }
 
 void PrintMatchedLine(int *line_count, int *matched_count, char *line, char *pattern, grepFlags *active_flags, char *file_name, int files_count) {
-    // int line_len = StrLen(line);
     regex_t regex;
     int reti;
     char msgbuf[100];
