@@ -15,8 +15,8 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr,"Malloc error\n");
 		exit(1);
 	}
-  char *allowed_flags = "eivcln";
-  grepFlags active_flags = {false, false, false, false, false, false};
+  char *allowed_flags = "eivclnhsfo";
+  grepFlags active_flags = {false, false, false, false, false, false, false, false, false, false};
   bool legal_flag = true;
   for (int i = 1; i < argc && legal_flag; i++) {
     // Parse flags
@@ -43,8 +43,7 @@ int main(int argc, char *argv[]) {
           legal_flag = false;
           break;
         }
-        // Stop reading flags if e flag is reached and push rest of the flag as
-        // pattern
+        // Stop reading flags if e flag is reached and push rest of the flag as pattern
         if (flag[j] == 'e') {
           active_flags.e = true;
           int remaining_len = flag_len - j - 1;
@@ -53,6 +52,25 @@ int main(int argc, char *argv[]) {
             if (remaining_flags == NULL) {
               fprintf(stderr,"Malloc error\n");
 		          exit(1);
+            }
+            SliceStr(flag, remaining_flags, j + 1, flag_len);
+            AppendStr(patterns, remaining_flags, ',');
+            pattern_mode = false;
+            free(remaining_flags);
+          } else {
+            pattern_mode = true;
+          }
+          break;
+        }
+        // Stop reading flags if e flag is reached and push rest of the flag as pattern
+        if (flag[j] == 'f') {
+          active_flags.f = true;
+          int remaining_len = flag_len - j - 1;
+          if (remaining_len > 0) {
+            char *remaining_flags = malloc(0 * sizeof(char));
+            if (remaining_flags == NULL) {
+              fprintf(stderr,"Malloc error\n");
+              exit(1);
             }
             SliceStr(flag, remaining_flags, j + 1, flag_len);
             AppendStr(patterns, remaining_flags, ',');
@@ -79,6 +97,18 @@ int main(int argc, char *argv[]) {
             break;
           case 'n':
             active_flags.n = true;
+            break;
+          case 'h':
+            active_flags.h = true;
+            break;
+          case 's':
+            active_flags.s = true;
+            break;
+          case 'f':
+            active_flags.f = true;
+            break;
+          case 'o':
+            active_flags.o = true;
             break;
         }
       }

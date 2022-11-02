@@ -7,7 +7,7 @@ typedef struct CatFlags {
     bool n; // number all output lines
     bool s; // squeeze multiple adjacent blank lines
     bool T; // implies -v but also display tabs as ^I
-    bool v;
+    bool v; // Print imprintable chars
 } catFlags;
 
 typedef struct GrepFlags {
@@ -17,10 +17,15 @@ typedef struct GrepFlags {
     bool c; // Output count of matching lines only.
     bool l; // Output matching files only.
     bool n; // Precede each matching line with a line number.
+    bool h; // Output matching lines without preceding them by file names.
+    bool s; // Suppress error messages about nonexistent or unreadable files.
+    bool f; // Take regexes from a file.
+    bool o; // Output the matched parts of a matching line.
 } grepFlags;
 
 int StrLen (char *str);
 bool StrIncludesChar (char *str, char c);
+void StrToLowercase (char *str);
 char CheckStrFlags (char *flag);
 void SliceStr (char *str, char *result, int from , int to);
 void AppendStr (char *str1, char *str2, char separator);

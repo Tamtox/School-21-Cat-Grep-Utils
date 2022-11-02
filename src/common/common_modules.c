@@ -25,6 +25,16 @@ bool StrIncludesChar (char *str, char c) {
     return result;
 }
 
+void StrToLowercase (char *str) {
+    int str_len = StrLen(str);
+    // char *uppercase_alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    for (int i = 0; i < str_len; i++) {
+        if (str[i] >= 65 && str[i] <= 90) {
+            str[i] = str[i] + 32;
+        }
+    }
+}
+
 char CheckStrFlags (char *flag) {
     char str_flags[3][20] = {"--number-nonblank","--number","--squeeze-blank"};
     char *str_flags_let = "bns";
@@ -179,12 +189,42 @@ void ReadCatFile(char *fileName, catFlags *active_flags) {
     }
 }
 
+void ReadPatternFromFile (char *file_name) {
+    FILE *file = NULL;
+    file = fopen(file_name, "r");
+    if (file != NULL) {
+        // Read file whole 
+        int numbytes;
+        fseek(file, 0L, SEEK_END);
+        numbytes = ftell(file);
+        fseek(file, 0L, SEEK_SET);
+        if (numbytes > 0) {
+            // Read file line by line
+            const unsigned MAX_LENGTH = 256;
+            char line[MAX_LENGTH];
+            int line_count = 0;
+            int matched_count = 0;
+            while (fgets(line, MAX_LENGTH, file)) {
+                // Iterate through patterns
+            }
+            fclose(file);
+        }
+    } else {
+        fprintf(stderr,"grep: %s: No such file or directory\n", file_name);
+    }
+}
+
 void PrintMatchedLine(int *line_count, int *matched_count, char *line, char *pattern, grepFlags *active_flags, char *file_name, int files_count) {
+    // int line_len = StrLen(line);
     regex_t regex;
     int reti;
     char msgbuf[100];
-    // Regex compilation
-    reti = regcomp(&regex, pattern, 0);
+    // Regex compilation with and without i flag
+    if (active_flags->i) {
+        reti = regcomp(&regex, pattern, REG_ICASE);
+    } else {
+        reti = regcomp(&regex, pattern, 0);
+    }
     if (reti) {
         fprintf(stderr, "Could not compile regex\n");
         exit(1);
@@ -198,43 +238,42 @@ void PrintMatchedLine(int *line_count, int *matched_count, char *line, char *pat
         if (!active_flags->v) {
             *matched_count = *matched_count + 1; 
             // Check if only total count of matched lines needed
-            if (!active_flags->c) { 
-                // Line count 
-                if (active_flags->n) {
-                    if (files_count > 1) {
-                        printf("%s:%d:%s", file_name, *line_count, line);
-                    } else {
-                        printf("%d:%s", *line_count, line);
-                    }
-                } else {
-                    if (files_count > 1) {
-                        printf("%s:%s", file_name, line);
-                    } else {
-                        printf("%s", line);
-                    }
+            if (!active_flags->c && !active_flags->l) { 
+                // Print file name if more than one file
+                if (files_count > 1 && !active_flags->h) {
+                    printf("%s:", file_name);
                 }
+                // Print line number if n flag is active
+                if (active_flags->n) {
+                    printf("%d:", *line_count);
+                }
+                if (active_flags->o) {
+
+                }
+                printf("%s", line);
             }
         }
+        // if (line[line_len - 1] != '\n') {
+        //     printf("\n");
+        // }
     } else if (reti == REG_NOMATCH) {
         // Print line numbers if v flag is active
         if (active_flags->v) {
-            *matched_count = *matched_count + 1;
-            // Check if only total count of matched lines needed
             if (!active_flags->c) {
-                // Line count 
-                if (active_flags->n) {
-                    if (files_count > 1) {
-                        printf("%s:%d:%s", file_name, *line_count, line);
-                    } else {
-                        printf("%d:%s", *line_count, line);
-                    }
-                } else {
-                    if (files_count > 1) {
-                        printf("%s:%s", file_name, line);
-                    } else {
-                        printf("%s", line);
-                    }
+
+            }
+            *matched_count = *matched_count + 1; 
+            // Check if only total count of matched lines needed
+            if (!active_flags->c && !active_flags->l) { 
+                // Print file name if more than one file
+                if (files_count > 1 && !active_flags->h) {
+                    printf("%s:", file_name);
                 }
+                // Print line number if n flag is active
+                if (active_flags->n) {
+                    printf("%d:", *line_count);
+                }
+                printf("%s", line);
             }
         }
     } else {
@@ -277,22 +316,19 @@ void ReadGrepFile(char *file_name, grepFlags *active_flags, char *patterns, int 
             if (active_flags->c) {
                 // Output filenames if there are more than 1 file
                 if (files_count > 1) {
-                    printf("%s:%d\n", file_name , matched_count);
-                    // Output only matched file names
-                    if (active_flags->l && matched_count) {
-                        printf("%s\n", file_name);
-                    }
-                } else {
-                    printf("%d\n", matched_count);
-                    // Output only matched file names
-                    if (active_flags->l && matched_count) {
-                        printf("%s\n", file_name);
-                    }
+                    printf("%s:", file_name);
                 }
+                printf("%d\n", matched_count);
+            }
+            // Print names of files with matches
+            if (active_flags->l && matched_count) {
+                printf("%s\n", file_name);
             }
             fclose(file);
         }
     } else {
-        fprintf(stderr,"grep: %s: No such file or directory\n", file_name);
+        if (!active_flags->s) {
+            fprintf(stderr,"grep: %s: No such file or directory\n", file_name);
+        }
     }
 }

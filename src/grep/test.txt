@@ -1,11 +1,8 @@
-abc
-this
-is
-test
+ABC
 123
-zzz
-byt
-cat
-grep
+this
+iS
+test
+
 
 			
