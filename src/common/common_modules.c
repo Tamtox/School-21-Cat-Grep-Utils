@@ -221,27 +221,28 @@ void ReadPatternFromFile (char *file_name, char *patterns) {
 }
 
 void PrintMatchedLine(int *line_count, int *matched_count, char *line, char *pattern, grepFlags *active_flags, char *file_name, int files_count) {
+    bool reverse = active_flags->v;
+    // Disable reverse flag if both l and c flags are active 
+    if (active_flags->c && active_flags->l && active_flags->v) {
+        reverse = false;
+    }
     regex_t regex;
     int reti;
     char msgbuf[100];
     int line_len = StrLen(line);
-    // Regex compilation with and without i flag
-    if (active_flags->i) {
-        reti = regcomp(&regex, pattern, REG_ICASE);
-    } else {
-        reti = regcomp(&regex, pattern, 0);
-    }
+    reti = regcomp(&regex, pattern, active_flags->i ? REG_ICASE : 0);
     if (reti) {
         fprintf(stderr, "Could not compile regex\n");
         exit(1);
     }
     // Regex execution
-    reti = regexec(&regex, line, 0, NULL, 0);
+    regex_t arr_match[255];
+    reti = regexec(&regex, line, 255, arr_match, 0);
     *line_count = *line_count + 1;
     // Print normal or inverted matches
     if (!reti) {
         // Print line numbers if v flag is inactive
-        if (!active_flags->v) {
+        if (!reverse) {
             *matched_count = *matched_count + 1; 
             // Check if only total count of matched lines needed
             if (!active_flags->c && !active_flags->l) { 
@@ -264,10 +265,7 @@ void PrintMatchedLine(int *line_count, int *matched_count, char *line, char *pat
         }
     } else if (reti == REG_NOMATCH) {
         // Print line numbers if v flag is active
-        if (active_flags->v) {
-            if (!active_flags->c) {
-
-            }
+        if (reverse) {
             *matched_count = *matched_count + 1; 
             // Check if only total count of matched lines needed
             if (!active_flags->c && !active_flags->l) { 
