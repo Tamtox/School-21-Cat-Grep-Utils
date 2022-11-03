@@ -221,11 +221,6 @@ void ReadPatternFromFile (char *file_name, char *patterns) {
 }
 
 void PrintMatchedLine(int *line_count, int *matched_count, char *line, char *pattern, grepFlags *active_flags, char *file_name, int files_count) {
-    bool reverse = active_flags->v;
-    // Disable reverse flag if both l and c flags are active 
-    if (active_flags->c && active_flags->l && active_flags->v) {
-        reverse = false;
-    }
     regex_t regex;
     int reti;
     char msgbuf[100];
@@ -236,13 +231,14 @@ void PrintMatchedLine(int *line_count, int *matched_count, char *line, char *pat
         exit(1);
     }
     // Regex execution
-    regex_t arr_match[255];
-    reti = regexec(&regex, line, 255, arr_match, 0);
+    // regex_t arr_match[255];
+    // reti = regexec(&regex, line, 255, arr_match, 0);
+    reti = regexec(&regex, line, 0, 0, 0);
     *line_count = *line_count + 1;
     // Print normal or inverted matches
     if (!reti) {
         // Print line numbers if v flag is inactive
-        if (!reverse) {
+        if (!active_flags->v) {
             *matched_count = *matched_count + 1; 
             // Check if only total count of matched lines needed
             if (!active_flags->c && !active_flags->l) { 
@@ -265,7 +261,7 @@ void PrintMatchedLine(int *line_count, int *matched_count, char *line, char *pat
         }
     } else if (reti == REG_NOMATCH) {
         // Print line numbers if v flag is active
-        if (reverse) {
+        if (active_flags->v) {
             *matched_count = *matched_count + 1; 
             // Check if only total count of matched lines needed
             if (!active_flags->c && !active_flags->l) { 
@@ -325,7 +321,12 @@ void ReadGrepFile(char *file_name, grepFlags *active_flags, char *patterns, int 
                 if (files_count > 1) {
                     printf("%s:", file_name);
                 }
-                printf("%d\n", matched_count);
+                if (active_flags->l) {
+                    int matches = matched_count ? 1 : 0;
+                    printf("%d\n", matches);
+                } else {
+                    printf("%d\n", matched_count);
+                }
             }
             // Print names of files with matches
             if (active_flags->l && matched_count) {
