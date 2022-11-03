@@ -48,11 +48,6 @@ char CheckStrFlags (char *flag) {
 }
 
 void SliceStr (char *str, char *result, int from , int to) {
-    result = realloc(result, (to - from) * sizeof(char));
-    if (result == NULL) {
-        fprintf(stderr,"Malloc error\n");
-		exit(1);
-    }
     for (int i = 0; i < to - from; i++) {
         result[i] = str[from + i];
     }
@@ -62,11 +57,6 @@ void SliceStr (char *str, char *result, int from , int to) {
 void AppendStr (char *str1, char *str2, char separator) {
     int str1_len = StrLen(str1);
     int str2_len = StrLen(str2);
-    str1 = realloc(str1, (str1_len + str2_len + 1) * sizeof(char));
-    if (str1 == NULL) {
-        fprintf(stderr,"Malloc error\n");
-		exit(1);
-    }
     for (int i = 0; i < str2_len; i++) {
         str1[str1_len + i] = str2[i];
     }
@@ -210,6 +200,10 @@ void ReadPatternFromFile (char *file_name, char *patterns) {
             const unsigned MAX_LENGTH = 256;
             char line[MAX_LENGTH];
             while (fgets(line, MAX_LENGTH, file)) {
+                int line_len = StrLen(line);
+                if (line[line_len - 1] == '\n') {
+                    line[line_len - 1] = '\0';
+                }
                 // Save line as pattern
                 AppendStr(patterns, line, ',');
             }
@@ -220,28 +214,27 @@ void ReadPatternFromFile (char *file_name, char *patterns) {
     }
 }
 
-void PrintMatchedLine(int *line_count, int *matched_count, char *line, char *pattern, grepFlags *active_flags, char *file_name, int files_count) {
+void PrintMatchedLine(int *line_count, int *matched_count, int *patterns_matching, char *line, char *pattern, grepFlags *active_flags, char *file_name, int files_count) {
     regex_t regex;
-    int reti;
+    int reg_status;
     char msgbuf[100];
     int line_len = StrLen(line);
-    reti = regcomp(&regex, pattern, active_flags->i ? REG_ICASE : 0);
-    if (reti) {
+    reg_status = regcomp(&regex, pattern, active_flags->i ? REG_ICASE : 0);
+    if (reg_status) {
         fprintf(stderr, "Could not compile regex\n");
         exit(1);
     }
     // Regex execution
-    // regex_t arr_match[255];
-    // reti = regexec(&regex, line, 255, arr_match, 0);
-    reti = regexec(&regex, line, 0, 0, 0);
-    *line_count = *line_count + 1;
+    regmatch_t matches[2];
+    reg_status = regexec(&regex, line, 2, matches, 0);
+    // reg_status = regexec(&regex, line, 0, 0, 0);
     // Print normal or inverted matches
-    if (!reti) {
+    if (!reg_status) {
         // Print line numbers if v flag is inactive
         if (!active_flags->v) {
             *matched_count = *matched_count + 1; 
             // Check if only total count of matched lines needed
-            if (!active_flags->c && !active_flags->l) { 
+            if (!active_flags->c && !active_flags->l && *patterns_matching < 1) { 
                 // Print file name if more than one file
                 if (files_count > 1 && !active_flags->h) {
                     printf("%s:", file_name);
@@ -258,13 +251,14 @@ void PrintMatchedLine(int *line_count, int *matched_count, char *line, char *pat
                     printf("\n");
                 }
             }
+            *patterns_matching = *patterns_matching + 1;
         }
-    } else if (reti == REG_NOMATCH) {
+    } else if (reg_status == REG_NOMATCH) {
         // Print line numbers if v flag is active
         if (active_flags->v) {
             *matched_count = *matched_count + 1; 
             // Check if only total count of matched lines needed
-            if (!active_flags->c && !active_flags->l) { 
+            if (!active_flags->c && !active_flags->l && *patterns_matching < 1) { 
                 // Print file name if more than one file
                 if (files_count > 1 && !active_flags->h) {
                     printf("%s:", file_name);
@@ -278,12 +272,15 @@ void PrintMatchedLine(int *line_count, int *matched_count, char *line, char *pat
                     printf("\n");
                 }
             }
+            *patterns_matching = *patterns_matching + 1;
         }
     } else {
-        regerror(reti, &regex, msgbuf, sizeof(msgbuf));
+        regerror(reg_status, &regex, msgbuf, sizeof(msgbuf));
         fprintf(stderr, "Regex match failed: %s\n", msgbuf);
+        regfree(&regex);
         exit(1);
     }
+    regfree(&regex);
 }
 
 void ReadGrepFile(char *file_name, grepFlags *active_flags, char *patterns, int files_count) {
@@ -302,23 +299,26 @@ void ReadGrepFile(char *file_name, grepFlags *active_flags, char *patterns, int 
             int line_count = 0;
             int matched_count = 0;
             while (fgets(line, MAX_LENGTH, file)) {
+                line_count++;
                 // Iterate through patterns
                 int patterns_len = StrLen(patterns);
                 int start_pos = 0;
+                // Check if multiple patterns apply to same line
+                int patterns_matching = 0;
                 for (int i = 0; i < patterns_len; i++) {
                     if (patterns[i] == ',') {
-                        char *pattern = malloc(0 * sizeof(char));
+                        char pattern[50] ={'\0'};
                         SliceStr (patterns, pattern, start_pos, i);
-                        PrintMatchedLine(&line_count, &matched_count, line, pattern, active_flags, file_name, files_count);
+                        PrintMatchedLine(&line_count, &matched_count, &patterns_matching, line, pattern, active_flags, file_name, files_count);
                         start_pos = i + 1;
-                        free(pattern);
+
                     }
                 }
             }
             // Print matched lines count
             if (active_flags->c) {
                 // Output filenames if there are more than 1 file
-                if (files_count > 1) {
+                if (files_count > 1 && !active_flags->h) {
                     printf("%s:", file_name);
                 }
                 if (active_flags->l) {

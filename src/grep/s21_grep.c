@@ -9,25 +9,45 @@
 int main(int argc, char *argv[]) {
   bool pattern_mode = true;
   bool pattern_from_file_mode = false;
-  char *patterns = malloc(1 * sizeof(char));
-  char *files = malloc(1 * sizeof(char));
+  char patterns[250] = {'\0'};
+  char files[250] = {'\0'};
   int files_count = 0;
-	if (patterns == NULL || files == NULL) {
-		fprintf(stderr,"Malloc error\n");
-		exit(1);
-	}
   char *allowed_flags = "eivclnhsfo";
   grepFlags active_flags = {false, false, false, false, false, false, false, false, false, false};
   bool legal_flag = true;
+  // Scout for e flag
+  for (int i = 1; i < argc && legal_flag; i++) {
+    // Parse flags
+    bool end_scout = false;
+    if (argv[i][0] == '-') {
+      // Str argv to variable
+      int flag_len = StrLen(argv[i]);
+      char flag[50] = {'\0'};
+      for (int j = 0; j < flag_len; j++) {
+        flag[j] = argv[i][j];
+      }
+      flag[flag_len] = '\0';
+      for (int j = 1; j < flag_len; j++) {
+        if (flag[j] == 'e') {
+          pattern_mode = false;
+          end_scout = true;
+        }
+      }
+    }
+    if (end_scout) {
+      break;
+    }
+  }
   for (int i = 1; i < argc && legal_flag; i++) {
     // Parse flags
     if (argv[i][0] == '-') {
       // Str argv to variable
       int flag_len = StrLen(argv[i]);
-      char *flag = malloc(flag_len * sizeof(char));
+      char flag[50] = {'\0'};
       for (int j = 0; j < flag_len; j++) {
         flag[j] = argv[i][j];
       }
+      flag[flag_len] = '\0';
       for (int j = 1; j < flag_len; j++) {
         // Check if flag is legal
         if (!StrIncludesChar(allowed_flags, flag[j])) {
@@ -49,15 +69,10 @@ int main(int argc, char *argv[]) {
           active_flags.e = true;
           int remaining_len = flag_len - j - 1;
           if (remaining_len > 0) {
-            char *remaining_flags = malloc(0 * sizeof(char));
-            if (remaining_flags == NULL) {
-              fprintf(stderr,"Malloc error\n");
-		          exit(1);
-            }
+            char remaining_flags[50] = {'\0'};
             SliceStr(flag, remaining_flags, j + 1, flag_len);
             AppendStr(patterns, remaining_flags, ',');
             pattern_mode = false;
-            free(remaining_flags);
           } else {
             pattern_mode = true;
           }
@@ -68,14 +83,10 @@ int main(int argc, char *argv[]) {
           active_flags.f = true;
           int remaining_len = flag_len - j - 1;
           if (remaining_len > 0) {
-            char *remaining_flags = malloc(0 * sizeof(char));
-            if (remaining_flags == NULL) {
-              fprintf(stderr,"Malloc error\n");
-              exit(1);
-            }
+            char remaining_flags[50] = {'\0'};
             SliceStr(flag, remaining_flags, j + 1, flag_len);
             ReadPatternFromFile(remaining_flags, patterns);
-            free(remaining_flags);
+            pattern_from_file_mode = false;
           } else {
             pattern_from_file_mode = true;
           }
@@ -105,21 +116,16 @@ int main(int argc, char *argv[]) {
           case 's':
             active_flags.s = true;
             break;
-          case 'f':
-            active_flags.f = true;
-            break;
           case 'o':
             active_flags.o = true;
             break;
         }
       }
-      free(flag);
-    }
-    // Parse pattern, files with patterns and files to apply patterns then save them
-    else {
+    } else { // Parse pattern, files with patterns and files to apply patterns then save them
       if (pattern_from_file_mode) {
         ReadPatternFromFile(argv[i], patterns);
         pattern_from_file_mode = false;
+        pattern_mode = false;
       } else if (pattern_mode) {
         AppendStr(patterns, argv[i], ',');
         pattern_mode = false;
@@ -134,18 +140,11 @@ int main(int argc, char *argv[]) {
   int start_pos = 0;
   for (int i = 0; i < files_len; i++) {
     if (files[i] == ',') {
-      char *file_name = malloc(0 * sizeof(char));
-      if (file_name == NULL) {
-        fprintf(stderr,"Malloc error\n");
-		    exit(1);
-      }
+      char file_name[50] = {'\0'};
       SliceStr(files, file_name, start_pos, i);
       ReadGrepFile(file_name, &active_flags, patterns, files_count);
       start_pos = i + 1;
-      free(file_name);
     }
   }
-  free(patterns);
-  free(files);
   return 0;
 }
