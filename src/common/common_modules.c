@@ -27,7 +27,6 @@ bool StrIncludesChar (char *str, char c) {
 
 void StrToLowercase (char *str) {
     int str_len = StrLen(str);
-    // char *uppercase_alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     for (int i = 0; i < str_len; i++) {
         if (str[i] >= 65 && str[i] <= 90) {
             str[i] = str[i] + 32;
@@ -50,6 +49,10 @@ char CheckStrFlags (char *flag) {
 
 void SliceStr (char *str, char *result, int from , int to) {
     result = realloc(result, (to - from) * sizeof(char));
+    if (result == NULL) {
+        fprintf(stderr,"Malloc error\n");
+		exit(1);
+    }
     for (int i = 0; i < to - from; i++) {
         result[i] = str[from + i];
     }
@@ -60,6 +63,10 @@ void AppendStr (char *str1, char *str2, char separator) {
     int str1_len = StrLen(str1);
     int str2_len = StrLen(str2);
     str1 = realloc(str1, (str1_len + str2_len + 1) * sizeof(char));
+    if (str1 == NULL) {
+        fprintf(stderr,"Malloc error\n");
+		exit(1);
+    }
     for (int i = 0; i < str2_len; i++) {
         str1[str1_len + i] = str2[i];
     }
@@ -189,35 +196,35 @@ void ReadCatFile(char *fileName, catFlags *active_flags) {
     }
 }
 
-// void ReadPatternFromFile (char *file_name) {
-//     FILE *file = NULL;
-//     file = fopen(file_name, "r");
-//     if (file != NULL) {
-//         // Read file whole 
-//         int numbytes;
-//         fseek(file, 0L, SEEK_END);
-//         numbytes = ftell(file);
-//         fseek(file, 0L, SEEK_SET);
-//         if (numbytes > 0) {
-//             // Read file line by line
-//             const unsigned MAX_LENGTH = 256;
-//             char line[MAX_LENGTH];
-//             int line_count = 0;
-//             int matched_count = 0;
-//             while (fgets(line, MAX_LENGTH, file)) {
-//                 // Iterate through patterns
-//             }
-//             fclose(file);
-//         }
-//     } else {
-//         fprintf(stderr,"grep: %s: No such file or directory\n", file_name);
-//     }
-// }
+void ReadPatternFromFile (char *file_name, char *patterns) {
+    FILE *file = NULL;
+    file = fopen(file_name, "r");
+    if (file != NULL) {
+        // Read file whole 
+        int numbytes;
+        fseek(file, 0L, SEEK_END);
+        numbytes = ftell(file);
+        fseek(file, 0L, SEEK_SET);
+        if (numbytes > 0) {
+            // Read file line by line
+            const unsigned MAX_LENGTH = 256;
+            char line[MAX_LENGTH];
+            while (fgets(line, MAX_LENGTH, file)) {
+                // Save line as pattern
+                AppendStr(patterns, line, ',');
+            }
+            fclose(file);
+        }
+    } else {
+        fprintf(stderr,"grep: %s: No such file or directory\n", file_name);
+    }
+}
 
 void PrintMatchedLine(int *line_count, int *matched_count, char *line, char *pattern, grepFlags *active_flags, char *file_name, int files_count) {
     regex_t regex;
     int reti;
     char msgbuf[100];
+    int line_len = StrLen(line);
     // Regex compilation with and without i flag
     if (active_flags->i) {
         reti = regcomp(&regex, pattern, REG_ICASE);
@@ -250,11 +257,11 @@ void PrintMatchedLine(int *line_count, int *matched_count, char *line, char *pat
 
                 }
                 printf("%s", line);
+                if (line[line_len - 1] != '\n') {
+                    printf("\n");
+                }
             }
         }
-        // if (line[line_len - 1] != '\n') {
-        //     printf("\n");
-        // }
     } else if (reti == REG_NOMATCH) {
         // Print line numbers if v flag is active
         if (active_flags->v) {
@@ -273,6 +280,9 @@ void PrintMatchedLine(int *line_count, int *matched_count, char *line, char *pat
                     printf("%d:", *line_count);
                 }
                 printf("%s", line);
+                if (line[line_len - 1] != '\n') {
+                    printf("\n");
+                }
             }
         }
     } else {

@@ -8,6 +8,7 @@
 
 int main(int argc, char *argv[]) {
   bool pattern_mode = true;
+  bool pattern_from_file_mode = false;
   char *patterns = malloc(1 * sizeof(char));
   char *files = malloc(1 * sizeof(char));
   int files_count = 0;
@@ -62,7 +63,7 @@ int main(int argc, char *argv[]) {
           }
           break;
         }
-        // Stop reading flags if e flag is reached and push rest of the flag as pattern
+        // Stop reading flags if f flag is reached and read pattern from provided file or use remaining flags as filename
         if (flag[j] == 'f') {
           active_flags.f = true;
           int remaining_len = flag_len - j - 1;
@@ -73,12 +74,12 @@ int main(int argc, char *argv[]) {
               exit(1);
             }
             SliceStr(flag, remaining_flags, j + 1, flag_len);
-            AppendStr(patterns, remaining_flags, ',');
-            pattern_mode = false;
+            ReadPatternFromFile(remaining_flags, patterns);
             free(remaining_flags);
           } else {
-            pattern_mode = true;
+            pattern_from_file_mode = true;
           }
+          pattern_mode = false;
           break;
         }
         // Set flag to active
@@ -114,9 +115,12 @@ int main(int argc, char *argv[]) {
       }
       free(flag);
     }
-    // Parse pattern and files then save them
+    // Parse pattern, files with patterns and files to apply patterns then save them
     else {
-      if (pattern_mode) {
+      if (pattern_from_file_mode) {
+        ReadPatternFromFile(argv[i], patterns);
+        pattern_from_file_mode = false;
+      } else if (pattern_mode) {
         AppendStr(patterns, argv[i], ',');
         pattern_mode = false;
       } else {
