@@ -245,6 +245,7 @@ void PrintMatchedLine(int *matched_count, int *patterns_matching, char *line, ch
     }
     if (active_flags->o && !active_flags->c && !active_flags->v && !active_flags->l) {
         reg_status = regexec(&regex, line, 0, 0, 0);
+        regfree(&regex);
         // Check if line contains any matches
         if (!reg_status) {
             // Print file name if more than one file
@@ -284,8 +285,7 @@ void PrintMatchedLine(int *matched_count, int *patterns_matching, char *line, ch
                 printf("\n");
             }
         }
-    } 
-    else {
+    } else {
         reg_status = regexec(&regex, line, 0, 0, 0);
         regfree(&regex);
         // Print normal or inverted matches
