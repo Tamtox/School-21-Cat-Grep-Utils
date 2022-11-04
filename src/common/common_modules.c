@@ -225,62 +225,73 @@ void PrintMatchedLine(int *line_count, int *matched_count, int *patterns_matchin
         exit(1);
     }
     // Regex execution
-    regmatch_t matches[2];
-    reg_status = regexec(&regex, line, 2, matches, 0);
-    // reg_status = regexec(&regex, line, 0, 0, 0);
-    // Print normal or inverted matches
-    if (!reg_status) {
-        // Print line numbers if v flag is inactive
-        if (!active_flags->v) {
-            *matched_count = *matched_count + 1; 
-            // Check if only total count of matched lines needed
-            if (!active_flags->c && !active_flags->l && *patterns_matching < 1) { 
-                // Print file name if more than one file
-                if (files_count > 1 && !active_flags->h) {
-                    printf("%s:", file_name);
-                }
-                // Print line number if n flag is active
-                if (active_flags->n) {
-                    printf("%d:", *line_count);
-                }
-                if (active_flags->o) {
-
-                }
-                printf("%s", line);
-                if (line[line_len - 1] != '\n') {
-                    printf("\n");
-                }
-            }
-            *patterns_matching = *patterns_matching + 1;
-        }
-    } else if (reg_status == REG_NOMATCH) {
-        // Print line numbers if v flag is active
-        if (active_flags->v) {
-            *matched_count = *matched_count + 1; 
-            // Check if only total count of matched lines needed
-            if (!active_flags->c && !active_flags->l && *patterns_matching < 1) { 
-                // Print file name if more than one file
-                if (files_count > 1 && !active_flags->h) {
-                    printf("%s:", file_name);
-                }
-                // Print line number if n flag is active
-                if (active_flags->n) {
-                    printf("%d:", *line_count);
-                }
-                printf("%s", line);
-                if (line[line_len - 1] != '\n') {
-                    printf("\n");
-                }
-            }
-            *patterns_matching = *patterns_matching + 1;
-        }
+    size_t nmatch = 3;
+    regmatch_t matches[nmatch];
+    if (active_flags->o && !active_flags->c && !active_flags->v && !active_flags->l) {
+        printf("O flag case\n");
     } else {
-        regerror(reg_status, &regex, msgbuf, sizeof(msgbuf));
-        fprintf(stderr, "Regex match failed: %s\n", msgbuf);
+         reg_status = regexec(&regex, line, nmatch, matches, 0);
         regfree(&regex);
-        exit(1);
+        // Print normal or inverted matches
+        if (!reg_status) {
+            // printf("Line: <<%.*s>>\n", (int)(matches[0].rm_eo - matches[0].rm_so), line + matches[0].rm_so);
+            // printf("match offsets are %lld %lld\n", matches[0].rm_so, matches[0].rm_eo);
+            // printf("match[0]=%.*s<\n", (int)matches[0].rm_eo, &line[matches[0].rm_so]);
+
+            // printf("submatch offsets are %lld %lld\n", matches[1].rm_so, matches[1].rm_eo);
+            // if(matches[1].rm_so != -1) {
+            //     printf("match[1]=%.*s<\n", (int)matches[1].rm_eo, &line[matches[1].rm_so]);
+            // }
+            // Print line numbers if v flag is inactive
+            if (!active_flags->v) {
+                *matched_count = *matched_count + 1; 
+                // Check if only total count of matched lines needed
+                if (!active_flags->c && !active_flags->l && *patterns_matching < 1) { 
+                    // Print file name if more than one file
+                    if (files_count > 1 && !active_flags->h) {
+                        printf("%s:", file_name);
+                    }
+                    // Print line number if n flag is active
+                    if (active_flags->n) {
+                        printf("%d:", *line_count);
+                    }
+                    if (active_flags->o) {
+
+                    }
+                    printf("%s", line);
+                    if (line[line_len - 1] != '\n') {
+                        printf("\n");
+                    }
+                }
+                *patterns_matching = *patterns_matching + 1;
+            }
+        } else if (reg_status == REG_NOMATCH) {
+            // Print line numbers if v flag is active
+            if (active_flags->v) {
+                *matched_count = *matched_count + 1; 
+                // Check if only total count of matched lines needed
+                if (!active_flags->c && !active_flags->l && *patterns_matching < 1) { 
+                    // Print file name if more than one file
+                    if (files_count > 1 && !active_flags->h) {
+                        printf("%s:", file_name);
+                    }
+                    // Print line number if n flag is active
+                    if (active_flags->n) {
+                        printf("%d:", *line_count);
+                    }
+                    printf("%s", line);
+                    if (line[line_len - 1] != '\n') {
+                        printf("\n");
+                    }
+                }
+                *patterns_matching = *patterns_matching + 1;
+            }
+        } else {
+            regerror(reg_status, &regex, msgbuf, sizeof(msgbuf));
+            fprintf(stderr, "Regex match failed: %s\n", msgbuf);
+            exit(1);
+        }
     }
-    regfree(&regex);
 }
 
 void ReadGrepFile(char *file_name, grepFlags *active_flags, char *patterns, int files_count) {
