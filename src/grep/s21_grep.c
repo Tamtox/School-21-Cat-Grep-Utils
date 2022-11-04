@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
   char *allowed_flags = "eivclnhsfo";
   grepFlags active_flags = {false, false, false, false, false, false, false, false, false, false};
   bool legal_flag = true;
-  // Scout for e flag
+  // Scout ahead for e flag
   for (int i = 1; i < argc && legal_flag; i++) {
     // Parse flags
     bool end_scout = false;

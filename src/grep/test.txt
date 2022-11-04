@@ -1,7 +1,6 @@
 ABC
 123
-this
-iS
+is ISADORA is
 test
 test
 

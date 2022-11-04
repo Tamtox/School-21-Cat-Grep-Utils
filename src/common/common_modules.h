@@ -32,6 +32,7 @@ void AppendStr (char *str1, char *str2, char separator);
 int CatLineNumeration (bool numerate_full_lines, bool numerate_lines, int line_count, char line_start);
 void ReadCatFile(char *fileName, catFlags *activeFlags);
 void ReadPatternFromFile (char *file_name, char *patterns);
+void PrintMatch(char *pattern, char *text, grepFlags *active_flags);
 void PrintMatchedLine(int *line_count, int *matched_count, int *patterns_matching, char *line, char *pattern, grepFlags *active_flags, char *file_name, int files_count);
 void ReadGrepFile(char *file_name, grepFlags *active_flags, char *patterns, int files_count);
 

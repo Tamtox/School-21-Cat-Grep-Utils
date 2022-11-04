@@ -214,6 +214,27 @@ void ReadPatternFromFile (char *file_name, char *patterns) {
     }
 }
 
+void PrintMatch(char *pattern, char *text, grepFlags *active_flags) {
+    regex_t regex;
+    int reg_status;
+    // char msgbuf[100];
+    reg_status = regcomp(&regex, pattern, active_flags->i ? REG_ICASE : 0);
+    if (reg_status) {
+        fprintf(stderr, "Could not compile regex\n");
+        regfree(&regex);
+        exit(1);
+    }
+    size_t nmatch = 2;
+    regmatch_t matches[nmatch];
+    reg_status = regexec(&regex, text, nmatch, matches, 0);
+    regfree(&regex);
+    if (reg_status == 0) {
+        printf("%.*s\n", (int)(matches[0].rm_eo - matches[0].rm_so), text + matches[0].rm_so);
+        // printf("%d", (int)matches[0].rm_eo);
+        // printf("match offsets are %lld %lld\n", matches[0].rm_so, matches[0].rm_eo);
+    }
+}
+
 void PrintMatchedLine(int *line_count, int *matched_count, int *patterns_matching, char *line, char *pattern, grepFlags *active_flags, char *file_name, int files_count) {
     regex_t regex;
     int reg_status;
@@ -222,26 +243,50 @@ void PrintMatchedLine(int *line_count, int *matched_count, int *patterns_matchin
     reg_status = regcomp(&regex, pattern, active_flags->i ? REG_ICASE : 0);
     if (reg_status) {
         fprintf(stderr, "Could not compile regex\n");
+        regfree(&regex);
         exit(1);
     }
-    // Regex execution
-    size_t nmatch = 3;
-    regmatch_t matches[nmatch];
     if (active_flags->o && !active_flags->c && !active_flags->v && !active_flags->l) {
-        printf("O flag case\n");
+        reg_status = regexec(&regex, line, 0, 0, 0);
+        // Check if line contains any matches
+        if (!reg_status) {
+            // Print file name if more than one file
+            if (files_count > 1 && !active_flags->h) {
+                printf("%s:", file_name);
+            }
+            // Print line number if n flag is active
+            if (active_flags->n) {
+                printf("%d:", *line_count);
+            }
+            // Print out all matches by adjusting line offset
+            for (int i = 0; i < line_len; i++) {
+                // Find start and end of substring
+                int start = 0, end = 0;
+                // Find Substrings separated by non-printable chars
+                if (line[i] > 32 && line[i] != 127) {
+                    start = i;
+                    for (int j = i + 1; j < line_len; j++) {
+                        if ((line[j] >= 0 && line[j] <= 32) || line[j] == 127) {
+                            end = j;
+                            break;
+                        }
+                    }
+                    if (end > 0) {
+                        i = end;
+                    }
+                }
+                if (end > 0) {
+                    char sub_str[255] = {'\0'};
+                    SliceStr(line, sub_str, start, end);
+                    PrintMatch(pattern, sub_str, active_flags);
+                }
+            }
+        }
     } else {
-         reg_status = regexec(&regex, line, nmatch, matches, 0);
+        reg_status = regexec(&regex, line, 0, 0, 0);
         regfree(&regex);
         // Print normal or inverted matches
         if (!reg_status) {
-            // printf("Line: <<%.*s>>\n", (int)(matches[0].rm_eo - matches[0].rm_so), line + matches[0].rm_so);
-            // printf("match offsets are %lld %lld\n", matches[0].rm_so, matches[0].rm_eo);
-            // printf("match[0]=%.*s<\n", (int)matches[0].rm_eo, &line[matches[0].rm_so]);
-
-            // printf("submatch offsets are %lld %lld\n", matches[1].rm_so, matches[1].rm_eo);
-            // if(matches[1].rm_so != -1) {
-            //     printf("match[1]=%.*s<\n", (int)matches[1].rm_eo, &line[matches[1].rm_so]);
-            // }
             // Print line numbers if v flag is inactive
             if (!active_flags->v) {
                 *matched_count = *matched_count + 1; 
@@ -254,9 +299,6 @@ void PrintMatchedLine(int *line_count, int *matched_count, int *patterns_matchin
                     // Print line number if n flag is active
                     if (active_flags->n) {
                         printf("%d:", *line_count);
-                    }
-                    if (active_flags->o) {
-
                     }
                     printf("%s", line);
                     if (line[line_len - 1] != '\n') {
