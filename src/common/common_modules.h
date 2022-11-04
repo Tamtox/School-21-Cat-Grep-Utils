@@ -33,7 +33,7 @@ int CatLineNumeration (bool numerate_full_lines, bool numerate_lines, int line_c
 void ReadCatFile(char *fileName, catFlags *activeFlags);
 void ReadPatternFromFile (char *file_name, char *patterns);
 void PrintMatch(char *pattern, char *text, grepFlags *active_flags);
-void PrintMatchedLine(int *line_count, int *matched_count, int *patterns_matching, char *line, char *pattern, grepFlags *active_flags, char *file_name, int files_count);
+void PrintMatchedLine(int *matched_count, int *patterns_matching, char *line, char *pattern, grepFlags *active_flags, int files_count, int *to_print, char *file_name, int line_count, int line_len);
 void ReadGrepFile(char *file_name, grepFlags *active_flags, char *patterns, int files_count);
 
 #endif // SRC_S21_COMMON_H_

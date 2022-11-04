@@ -2,7 +2,4 @@ ABC
 123
 is ISADORA is
 test
-test
-
-
-			
+test	
