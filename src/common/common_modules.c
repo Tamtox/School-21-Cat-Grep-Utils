@@ -354,6 +354,10 @@ void ReadGrepFile(char *file_name, grepFlags *active_flags, char *patterns, int 
                         start_pos = i + 1;
                     }
                 }
+                // Prevent line from printing if v flag is active and multiple matterns are present
+                if (active_flags->v && patterns_matching != total_patterns) {
+                    continue;
+                }
                 // Print file name if more than one file and h flag is inactive
                 if (to_print[0]) {
                     printf("%s:", file_name);
