@@ -44,15 +44,39 @@ int main(int argc, char *argv[]) {
           }
           // Set flag to active
           switch (flag[j]) {
+            case 'b':
+              active_flags.b = true;
+              break;
+            case 'e':
+              active_flags.E = true;
+              active_flags.v = true;
+              break;
+            case 'E':
+              active_flags.E = true;
+              break;
+            case 'n':
+              active_flags.n = true;
+              break;
+            case 's':
+              active_flags.s = true;
+              break;
+            case 't':
+              active_flags.T = true;
+              active_flags.v = true;
+              break;
+            case 'T':
+              active_flags.T = true;
+              break;
+            case 'v':
+              active_flags.v = true;
+              break;
+          }
+        }
+      } else {
+        // Set flag to active
+        switch (str_flag_check) {
           case 'b':
             active_flags.b = true;
-            break;
-          case 'e':
-            active_flags.E = true;
-            active_flags.v = true;
-            break;
-          case 'E':
-            active_flags.E = true;
             break;
           case 'n':
             active_flags.n = true;
@@ -60,30 +84,6 @@ int main(int argc, char *argv[]) {
           case 's':
             active_flags.s = true;
             break;
-          case 't':
-            active_flags.T = true;
-            active_flags.v = true;
-            break;
-          case 'T':
-            active_flags.T = true;
-            break;
-          case 'v':
-            active_flags.v = true;
-            break;
-          }
-        }
-      } else {
-        // Set flag to active
-        switch (str_flag_check) {
-        case 'b':
-          active_flags.b = true;
-          break;
-        case 'n':
-          active_flags.n = true;
-          break;
-        case 's':
-          active_flags.s = true;
-          break;
         }
       }
       free(flag);
