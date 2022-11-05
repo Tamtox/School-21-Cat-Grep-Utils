@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "../common/common_modules.h"
+#include "cat_functions.h"
 
 int main(int argc, char *argv[]) {
   bool flag_parse = true;
@@ -24,8 +25,8 @@ int main(int argc, char *argv[]) {
       int flag_len = StrLen(argv[i]);
       char *flag = malloc(flag_len * sizeof(char));
       if (flag == NULL) {
-          fprintf(stderr,"Malloc error\n");
-          exit(1);
+        fprintf(stderr, "Malloc error\n");
+        exit(1);
       }
       for (int j = 0; j < flag_len; j++) {
         flag[j] = argv[i][j];
@@ -43,39 +44,15 @@ int main(int argc, char *argv[]) {
           }
           // Set flag to active
           switch (flag[j]) {
-            case 'b':
-              active_flags.b = true;
-              break;
-            case 'e':
-              active_flags.E = true;
-              active_flags.v = true;
-              break;
-            case 'E':
-              active_flags.E = true;
-              break;
-            case 'n':
-              active_flags.n = true;
-              break;
-            case 's':
-              active_flags.s = true;
-              break;
-            case 't':
-              active_flags.T = true;
-              active_flags.v = true;
-              break;
-            case 'T':
-              active_flags.T = true;
-              break;
-            case 'v':
-              active_flags.v = true;
-              break;
-          }
-        }
-      } else {
-        // Set flag to active
-        switch (str_flag_check) {
           case 'b':
             active_flags.b = true;
+            break;
+          case 'e':
+            active_flags.E = true;
+            active_flags.v = true;
+            break;
+          case 'E':
+            active_flags.E = true;
             break;
           case 'n':
             active_flags.n = true;
@@ -83,6 +60,30 @@ int main(int argc, char *argv[]) {
           case 's':
             active_flags.s = true;
             break;
+          case 't':
+            active_flags.T = true;
+            active_flags.v = true;
+            break;
+          case 'T':
+            active_flags.T = true;
+            break;
+          case 'v':
+            active_flags.v = true;
+            break;
+          }
+        }
+      } else {
+        // Set flag to active
+        switch (str_flag_check) {
+        case 'b':
+          active_flags.b = true;
+          break;
+        case 'n':
+          active_flags.n = true;
+          break;
+        case 's':
+          active_flags.s = true;
+          break;
         }
       }
       free(flag);

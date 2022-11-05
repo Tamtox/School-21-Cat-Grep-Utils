@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "../common/common_modules.h"
+#include "grep_functions.h"
 
 int main(int argc, char *argv[]) {
   bool pattern_mode = true;
@@ -13,7 +14,8 @@ int main(int argc, char *argv[]) {
   char files[250] = {'\0'};
   int files_count = 0;
   char *allowed_flags = "eivclnhsfo";
-  grepFlags active_flags = {false, false, false, false, false, false, false, false, false, false};
+  grepFlags active_flags = {false, false, false, false, false,
+                            false, false, false, false, false};
   bool legal_flag = true;
   // Scout ahead for e flag
   for (int i = 1; i < argc && legal_flag; i++) {
@@ -57,14 +59,14 @@ int main(int argc, char *argv[]) {
           fprintf(
               stderr,
               "[-e pattern] [-f file] [--binary-files=value] [--color=when]\n");
-          fprintf(stderr,
-                  "[--context[=num]] [--directories=action] [--label] "
-                  "[--line-buffered]\n");
+          fprintf(stderr, "[--context[=num]] [--directories=action] [--label] "
+                          "[--line-buffered]\n");
           fprintf(stderr, "[--null] [pattern] [file ...]\n");
           legal_flag = false;
           break;
         }
-        // Stop reading flags if e flag is reached and push rest of the flag as pattern
+        // Stop reading flags if e flag is reached and push rest of the flag as
+        // pattern
         if (flag[j] == 'e') {
           active_flags.e = true;
           int remaining_len = flag_len - j - 1;
@@ -78,7 +80,8 @@ int main(int argc, char *argv[]) {
           }
           break;
         }
-        // Stop reading flags if f flag is reached and read pattern from provided file or use remaining flags as filename
+        // Stop reading flags if f flag is reached and read pattern from
+        // provided file or use remaining flags as filename
         if (flag[j] == 'f') {
           active_flags.f = true;
           int remaining_len = flag_len - j - 1;
@@ -95,33 +98,34 @@ int main(int argc, char *argv[]) {
         }
         // Set flag to active
         switch (flag[j]) {
-          case 'i':
-            active_flags.i = true;
-            break;
-          case 'v':
-            active_flags.v = true;
-            break;
-          case 'c':
-            active_flags.c = true;
-            break;
-          case 'l':
-            active_flags.l = true;
-            break;
-          case 'n':
-            active_flags.n = true;
-            break;
-          case 'h':
-            active_flags.h = true;
-            break;
-          case 's':
-            active_flags.s = true;
-            break;
-          case 'o':
-            active_flags.o = true;
-            break;
+        case 'i':
+          active_flags.i = true;
+          break;
+        case 'v':
+          active_flags.v = true;
+          break;
+        case 'c':
+          active_flags.c = true;
+          break;
+        case 'l':
+          active_flags.l = true;
+          break;
+        case 'n':
+          active_flags.n = true;
+          break;
+        case 'h':
+          active_flags.h = true;
+          break;
+        case 's':
+          active_flags.s = true;
+          break;
+        case 'o':
+          active_flags.o = true;
+          break;
         }
       }
-    } else { // Parse pattern, files with patterns and files to apply patterns then save them
+    } else { // Parse pattern, files with patterns and files to apply patterns
+             // then save them
       if (pattern_from_file_mode) {
         ReadPatternFromFile(argv[i], patterns);
         pattern_from_file_mode = false;

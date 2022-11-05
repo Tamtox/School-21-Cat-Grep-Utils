@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "grep_functions.h": "c",
+        "stdio.h": "c"
+    }
+}
